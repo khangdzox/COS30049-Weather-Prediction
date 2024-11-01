@@ -25,7 +25,7 @@ const NavBar = () => {
         </select>
       </div>
 
-      {/* Date Inputs */}
+      {/* Date Inputs
       <div className="date-selector">
         <label>From:</label>
         <input
@@ -39,7 +39,7 @@ const NavBar = () => {
           value={toDate}
           onChange={(e) => setToDate(e.target.value)}
         />
-      </div>
+      </div> */}
     </nav>
   );
 };
