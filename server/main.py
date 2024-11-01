@@ -15,6 +15,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from math import sqrt
 
+#random forest
+from sklearn.ensemble import RandomForestRegressor
+
 
 app = FastAPI()
 
@@ -123,24 +126,47 @@ def predict_weather(data: dict):
     data_processed_linreg = pd.get_dummies(data, columns=['State'], prefix=['State']).astype('float64')
     data_processed_linreg = data_processed_linreg.drop(['Tomorrow_Rain_Indicator'], axis=1)
 #linear reg
-linreg = LinearRegression()
+    linreg = LinearRegression()
 
 #prediction
-after_data_linreg = data.copy().drop(['Tomorrow_Rain_Indicator'], axis=1)
-after_data_linreg['Is predicted'] = 0
+    after_data_linreg = data.copy().drop(['Tomorrow_Rain_Indicator'], axis=1)
+    after_data_linreg['Is predicted'] = 0
 
-predict_data_linreg = data.copy().drop(['Tomorrow_Rain_Indicator'], axis=1)
-predict_data_linreg['Tomorrow_Rain_mm'] = linreg.predict(data_processed_reg.drop(['Tomorrow_Rain_mm'], axis=1))
-predict_data_linreg['Is predicted'] = 1
+    predict_data_linreg = data.copy().drop(['Tomorrow_Rain_Indicator'], axis=1)
+    predict_data_linreg['Tomorrow_Rain_mm'] = linreg.predict(data_processed_reg.drop(['Tomorrow_Rain_mm'], axis=1))
+    predict_data_linreg['Is predicted'] = 1
 
-after_all_linreg = pd.concat([after_data_linreg, predict_data_linreg])
+    after_all_linreg = pd.concat([after_data_linreg, predict_data_linreg])
 
 @app.post("/api/predict_visitor_random/")
 def predict_visitor(data: dict):
     # Ensure models are loaded
-    if not linear_model or not scaler:
+    if not visitor_model or not scaler:
         raise HTTPException(status_code=500, detail="Models or scalers not loaded.")
 
+    #preparing data
+    visitor_scaler = MinMaxScaler()
+    visitor_transform_data = data.drop(columns=['Year', 'Month', 'State', 'Number of arriving visitors'])
+    visitor_scaler.fit(visitor_transform_data)
+    data[visitor_transform_data.columns] = visitor_scaler.transform(visitor_transform_data)
+
+    visitor_target_scaler_reg = MinMaxScaler()
+    visitor_target_scaler_reg.fit(data[['Number of arriving visitors']])
+    data[['Number of arriving visitors']] = visitor_target_scaler_reg.transform(data[['Number of arriving visitors']])
+
+    visitor_data_processed = pd.get_dummies(data, columns=['State'], prefix=['State']).astype('float64')
+
+    ranfor = RandomForestRegressor(10, random_state=42)
+
+    target_data = data.copy()
+    target_data["Is predicted"] = 0
+
+    predict_visitor_data = data.copy()
+    predict_visitor_data['Number of arriving visitors'] = ranfor.predict(
+        visitor_data_processed.drop(['Number of arriving visitors'], axis=1))
+    predict_visitor_data["Is predicted"] = 1
+
+    visitor_prediction = pd.concat([target_data, predict_visitor_data])
 
 
 
