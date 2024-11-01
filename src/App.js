@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
 import NavBar from './components/Navbar';
 import ForecastCard from './components/ForecastCard';
 import WeatherChart from './components/WeatherChart';
+import About from './components/About'; // New component
+import Map from './components/Map'; // New component
+import FAQ from './components/FAQ'; // New component
 
 function App() {
   const [fromDate, setFromDate] = useState('');
@@ -17,49 +21,58 @@ function App() {
   ];
 
   return (
-    <div className="App">
-      <NavBar />
-      <div className="forecast-container">
-        <ForecastCard data={{ date: "22/08", rain: "0mm" }} />
-        <ForecastCard data={{ date: "23/08", rain: "3mm" }} />
-        <ForecastCard data={{ date: "24/08", rain: "2mm" }} />
-        <ForecastCard data={{ date: "25/08", rain: "0mm", isToday: true }} />
-        <div className="arrow">&#8594;</div> 
-        <ForecastCard data={{ date: "26/08", rain: "0mm", isTomorrow: true }} />
-      </div>
+    <Router>
+      <div className="App">
+        <NavBar />
 
-      {/* New Selector for Rainfall, Temperature, Wind Speed and Date Inputs */}
-      <div className="weather-selector">
-        <select>
-          <option>Rainfall</option>
-          <option>Temperature</option>
-          <option>Wind speed</option>
-        </select>
+        {/* Define Routes for different pages */}
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <>
+                <div className="forecast-container">
+                  {forecastData.map((data, index) => (
+                    <ForecastCard key={index} data={data} />
+                  ))}
+                  <div className="arrow">&#8594;</div>
+                </div>
 
-        {/* From and To Date Inputs */}
-        <div className="date-inputs">
-          <label>From:</label>
-          <input 
-            type="date" 
-            value={fromDate} 
-            onChange={(e) => setFromDate(e.target.value)} 
+                {/* Weather selector and date inputs */}
+                <div className="weather-selector">
+                  <select>
+                    <option>Rainfall</option>
+                    <option>Temperature</option>
+                    <option>Wind speed</option>
+                  </select>
+
+                  <div className="date-inputs">
+                    <label>From:</label>
+                    <input
+                      type="date"
+                      value={fromDate}
+                      onChange={(e) => setFromDate(e.target.value)}
+                    />
+                    <label>To:</label>
+                    <input
+                      type="date"
+                      value={toDate}
+                      onChange={(e) => setToDate(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <WeatherChart />
+              </>
+            }
           />
-          <label>To:</label>
-          <input 
-            type="date" 
-            value={toDate} 
-            onChange={(e) => setToDate(e.target.value)} 
-          />
-        </div>
+          <Route path="/about" element={<About />} />
+          <Route path="/map" element={<Map />} />
+          <Route path="/faq" element={<FAQ />} />
+        </Routes>
       </div>
-
-      <WeatherChart />
-    </div>
+    </Router>
   );
 }
 
 export default App;
-
-//Install 
-//npm install chart.js react-chartjs-2
-//npm install --save-dev @babel/plugin-proposal-private-property-in-object
