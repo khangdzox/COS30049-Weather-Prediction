@@ -108,39 +108,25 @@ def predict_weather_lin(data: dict):
 # Return the result
     return {"rain_mm_prediction": int(rain_mm_prediction)}
 
-
-
 @app.post("/api/predict_visitor_random/")
 def predict_visitor(data: dict):
     # Ensure models are loaded
-    if not visitor_model or not scaler:
+    if not ranfor_model or not scaler:
         raise HTTPException(status_code=500, detail="Models or scalers not loaded.")
 
     #preparing data
-    visitor_scaler = MinMaxScaler()
+    dataframe = pd.DataFrame(data, index=[0])
+    dataframe = pd.get_dummies(dataframe, columns=['State'], prefix=['State']).astype('int64')
+
     visitor_transform_data = data.drop(columns=['Year', 'Month', 'State', 'Number of arriving visitors'])
-    visitor_scaler.fit(visitor_transform_data)
-    data[visitor_transform_data.columns] = visitor_scaler.transform(visitor_transform_data)
 
-    visitor_target_scaler_reg = MinMaxScaler()
-    visitor_target_scaler_reg.fit(data[['Number of arriving visitors']])
-    data[['Number of arriving visitors']] = visitor_target_scaler_reg.transform(data[['Number of arriving visitors']])
+    dataframe[visitor_transform_data.columns] = scaler.transform(visitor_transform_data)
 
-    visitor_data_processed = pd.get_dummies(data, columns=['State'], prefix=['State']).astype('float64')
+    visitor_prediction['Number of arriving visitors'] = ranfor.predict(
+        visitor_transform_data.drop(dataframe)[0]
 
-    ranfor = RandomForestRegressor(10, random_state=42)
-
-    target_data = data.copy()
-    target_data["Is predicted"] = 0
-
-    predict_visitor_data = data.copy()
-    predict_visitor_data['Number of arriving visitors'] = ranfor.predict(
-        visitor_data_processed.drop(['Number of arriving visitors'], axis=1))
-    predict_visitor_data["Is predicted"] = 1
-
-    visitor_prediction = pd.concat([target_data, predict_visitor_data])
-
-
+    # Return the result
+    return {"Number of arriving visitors": int(visitor_prediction)}
 
 # Custom 404 handler for non-existent routes
 @app.exception_handler(404)
