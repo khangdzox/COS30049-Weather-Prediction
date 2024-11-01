@@ -65,47 +65,30 @@ def read_root():
 
 # Prediction endpoint
 @app.post("/api/predict_log/")
-def predict_weather(data: dict):
+def predict_weather_log(data: dict):
     # Ensure models are loaded
     if not logistic_model or not scaler:
         raise HTTPException(status_code=500, detail="Models or scalers not loaded.")
 
-#preparing data (normalizing)
-    log_scaler = MinMaxScaler()
-    log_transform_data = data.drop(
+    #preparing data (normalizing)
+    dataframe = pd.DataFrame(data, index=[0])
+
+    dataframe = pd.get_dummies(dataframe, columns=['State'], prefix=['State']).astype('int64')
+
+    log_transform_data = dataframe.drop(
         columns=['Day', 'Month', 'Year', 'State', 'Wind_Direction', 'Time_since_midnight', 'Dir_9am', 'Dir_3pm',
-                 'Temp_Diff', 'Tomorrow_Rain_Indicator', 'Tomorrow_Rain_mm'])
-    log_scaler.fit(log_transform_data)
-    data[log_transform_data.columns] = scaler.transform(log_transform_data)
+                 'Temp_Diff'])
+    dataframe[log_transform_data.columns] = scaler.transform(log_transform_data)
 
-    log_target_scaler_reg = MinMaxScaler()
-    log_target_scaler_reg.fit(data[['Tomorrow_Rain_mm']])
-    data[['Tomorrow_Rain_mm']] = log_target_scaler_reg.transform(data[['Tomorrow_Rain_mm']])
-
-#preparing data (binary classification)
-    data_processed_clf = pd.get_dummies(data, columns=['State'], prefix=['State']).astype('int64')
-    data_processed_clf = data_processed_clf.drop(['Tomorrow_Rain_mm'], axis=1)
-
-#logistic regression
-    logreg = LogisticRegression(max_iter=5000, random_state=42)
-
-#logistic reg prediction
-    target_data_logreg = data.copy().drop(['Tomorrow_Rain_mm'], axis=1)
-    target_data_logreg['Is predicted'] = 0
-
-    predict_data_logreg = data.copy().drop(['Tomorrow_Rain_mm'], axis=1)
-    predict_data_logreg['Tomorrow_Rain_Indicator'] = logreg.predict(
-        data_processed_clf.drop(['Tomorrow_Rain_Indicator'], axis=1))
-    predict_data_logreg['Is predicted'] = 1
-
-    rain_prediction_indicator = pd.concat([target_data_logreg, predict_data_logreg])
+    #logistic regression
+    rain_prediction_indicator = logistic_model.predict(dataframe)[0]
 
     # Return the result
-    return {"rain_prediction_indicator": max(0, int(rain_prediction_indicator))}
+    return {"rain_prediction_indicator": int(rain_prediction_indicator)}
 
 
 @app.post("/api/predict_lin/")
-def predict_weather(data: dict):
+def predict_weather_lin(data: dict):
     # Ensure models are loaded
     if not linear_model or not scaler:
         raise HTTPException(status_code=500, detail="Models or scalers not loaded.")
