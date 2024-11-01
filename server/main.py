@@ -34,28 +34,6 @@ def load_models():
 
 # Prediction endpoint
 @app.post("/predict/")
-def predict_weather(data: dict):
-    # Ensure models are loaded
-    if not logistic_model or not scaler:
-        raise HTTPException(status_code=500, detail="Models or scalers not loaded.")
-
-    # Convert input data to match model's feature set
-    # For example, if you need 'State' dummy variables, prepare them here
-    input_data = pd.DataFrame([data])
-    input_data_processed = pd.get_dummies(input_data)
-
-    # Align columns with training data
-    input_data_processed = input_data_processed.reindex(columns=logistic_model.feature_names_in_, fill_value=0)
-
-    # Scale the input data
-    scaled_data = scaler.transform(input_data_processed)
-
-    # Make predictions
-    rain_prediction_indicator = logistic_model.predict(scaled_data)[0]
-
-    # Return the result
-    return {"rain_prediction_indicator": int(rain_prediction_indicator)}
-
 
 # Custom 404 handler for non-existent routes
 @app.exception_handler(404)
