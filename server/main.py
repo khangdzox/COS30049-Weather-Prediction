@@ -6,6 +6,15 @@ from typing import Optional
 import joblib
 import numpy as np
 import pandas as pd
+#data preparation
+from sklearn.preprocessing import MinMaxScaler
+#logistic reg
+from sklearn.linear_model import LogisticRegression
+#linear reg
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+from math import sqrt
+
 
 app = FastAPI()
 
@@ -47,33 +56,93 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
+@app.get("/api/")
 def read_root():
     return {"message": "Welcome to the Weather Prediction API"}
 
 # Prediction endpoint
-@app.post("/predict/")
+@app.post("/api/predict_log/")
 def predict_weather(data: dict):
     # Ensure models are loaded
     if not logistic_model or not scaler:
         raise HTTPException(status_code=500, detail="Models or scalers not loaded.")
 
-    # Convert input data to match model's feature set
-    # For example, if you need 'State' dummy variables, prepare them here
-    input_data = pd.DataFrame([data])
-    input_data_processed = pd.get_dummies(input_data)
+#preparing data (normalizing)
+    log_scaler = MinMaxScaler()
+    log_transform_data = data.drop(
+        columns=['Day', 'Month', 'Year', 'State', 'Wind_Direction', 'Time_since_midnight', 'Dir_9am', 'Dir_3pm',
+                 'Temp_Diff', 'Tomorrow_Rain_Indicator', 'Tomorrow_Rain_mm'])
+    log_scaler.fit(log_transform_data)
+    data[log_transform_data.columns] = scaler.transform(log_transform_data)
 
-    # Align columns with training data
-    input_data_processed = input_data_processed.reindex(columns=logistic_model.feature_names_in_, fill_value=0)
+    log_target_scaler_reg = MinMaxScaler()
+    log_target_scaler_reg.fit(data[['Tomorrow_Rain_mm']])
+    data[['Tomorrow_Rain_mm']] = log_target_scaler_reg.transform(data[['Tomorrow_Rain_mm']])
 
-    # Scale the input data
-    scaled_data = scaler.transform(input_data_processed)
+#preparing data (binary classification)
+    data_processed_clf = pd.get_dummies(data, columns=['State'], prefix=['State']).astype('int64')
+    data_processed_clf = data_processed_clf.drop(['Tomorrow_Rain_mm'], axis=1)
 
-    # Make predictions
-    rain_prediction_indicator = logistic_model.predict(scaled_data)[0]
+#logistic regression
+    logreg = LogisticRegression(max_iter=5000, random_state=42)
+
+#logistic reg prediction
+    target_data_logreg = data.copy().drop(['Tomorrow_Rain_mm'], axis=1)
+    target_data_logreg['Is predicted'] = 0
+
+    predict_data_logreg = data.copy().drop(['Tomorrow_Rain_mm'], axis=1)
+    predict_data_logreg['Tomorrow_Rain_Indicator'] = logreg.predict(
+        data_processed_clf.drop(['Tomorrow_Rain_Indicator'], axis=1))
+    predict_data_logreg['Is predicted'] = 1
+
+    rain_prediction_indicator = pd.concat([target_data_logreg, predict_data_logreg])
 
     # Return the result
-    return {"rain_prediction_indicator": int(rain_prediction_indicator)}
+    return {"rain_prediction_indicator": max(0, int(rain_prediction_indicator))}
+
+
+@app.post("/api/predict_lin/")
+def predict_weather(data: dict):
+    # Ensure models are loaded
+    if not linear_model or not scaler:
+        raise HTTPException(status_code=500, detail="Models or scalers not loaded.")
+
+#preparing data (normalizing)
+    lin_scaler = MinMaxScaler()
+    lin_transform_data = data.drop(
+        columns=['Day', 'Month', 'Year', 'State', 'Wind_Direction', 'Time_since_midnight', 'Dir_9am', 'Dir_3pm',
+                 'Temp_Diff', 'Tomorrow_Rain_Indicator', 'Tomorrow_Rain_mm'])
+    lin_scaler.fit(lin_transform_data)
+    data[lin_transform_data.columns] = scaler.transform(lin_transform_data)
+
+    lin_target_scaler_reg = MinMaxScaler()
+    lin_target_scaler_reg.fit(data[['Tomorrow_Rain_mm']])
+    data[['Tomorrow_Rain_mm']] = lin_target_scaler_reg.transform(data[['Tomorrow_Rain_mm']])
+
+#preparing dataset (bi)
+    data_processed_linreg = pd.get_dummies(data, columns=['State'], prefix=['State']).astype('float64')
+    data_processed_linreg = data_processed_linreg.drop(['Tomorrow_Rain_Indicator'], axis=1)
+#linear reg
+linreg = LinearRegression()
+
+#prediction
+after_data_linreg = data.copy().drop(['Tomorrow_Rain_Indicator'], axis=1)
+after_data_linreg['Is predicted'] = 0
+
+predict_data_linreg = data.copy().drop(['Tomorrow_Rain_Indicator'], axis=1)
+predict_data_linreg['Tomorrow_Rain_mm'] = linreg.predict(data_processed_reg.drop(['Tomorrow_Rain_mm'], axis=1))
+predict_data_linreg['Is predicted'] = 1
+
+after_all_linreg = pd.concat([after_data_linreg, predict_data_linreg])
+
+@app.post("/api/predict_visitor_random/")
+def predict_visitor(data: dict):
+    # Ensure models are loaded
+    if not linear_model or not scaler:
+        raise HTTPException(status_code=500, detail="Models or scalers not loaded.")
+
+
+
 
 # Custom 404 handler for non-existent routes
 @app.exception_handler(404)
