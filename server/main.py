@@ -21,6 +21,10 @@ from sklearn.ensemble import RandomForestRegressor
 
 app = FastAPI()
 
+class DateRangeRequest(BaseModel):
+    start_date: str  # Expecting format "YYYY-MM-DD"
+    end_date: str    # Expecting format "YYYY-MM-DD"
+
 # Data model for weather prediction input
 class WeatherData(BaseModel):
     temperature: Optional[float] = None
@@ -35,11 +39,12 @@ target_scaler = None
 
 # Load models at startup
 def load_models():
-    global logistic_model, linear_model, scaler, target_scaler
+    global logistic_model, linear_model, scaler, target_scaler, random_forest_model
     logistic_model = joblib.load("models/logistic_regression_model.pkl")
     linear_model = joblib.load("models/linear_regression_model.pkl")
     scaler = joblib.load("models/scaler.pkl")
     target_scaler = joblib.load("models/target_scaler.pkl")
+    random_forest_model = joblib.load("models/random_forest_model.pkl")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -111,7 +116,7 @@ def predict_weather_lin(data: dict):
 @app.post("/api/predict_visitor_random/")
 def predict_visitor(data: dict):
     # Ensure models are loaded
-    if not ranfor_model or not scaler:
+    if not random_forest_model or not scaler:
         raise HTTPException(status_code=500, detail="Models or scalers not loaded.")
 
     #preparing data
@@ -122,11 +127,62 @@ def predict_visitor(data: dict):
 
     dataframe[visitor_transform_data.columns] = scaler.transform(visitor_transform_data)
 
-    visitor_prediction['Number of arriving visitors'] = ranfor.predict(
+    visitor_prediction['Number of arriving visitors'] = random_forest_model.predict(
         visitor_transform_data.drop(dataframe)[0]
 
     # Return the result
     return {"Number of arriving visitors": int(visitor_prediction)}
+
+@app.post("/api/predict_visitor_random/")
+def predict_visitor(data: dict):
+    # Ensure models are loaded
+    if not random_forest_model or not scaler:
+        raise HTTPException(status_code=500, detail="Models or scalers not loaded.")
+
+#chatgpt answer/ still nid modify
+@app.post("/predict_temperature_range/")
+def predict_temperature_range(date_range: DateRangeRequest, data: WeatherData):
+    # Ensure models are loaded
+    if not logistic_model or not scaler:
+        raise HTTPException(status_code=500, detail="Model or scaler not loaded.")
+
+    # Parse and validate dates
+    try:
+        start_date = datetime.strptime(date_range.start_date, "%Y-%m-%d")
+        end_date = datetime.strptime(date_range.end_date, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+
+    # Check if start_date is before end_date
+    if start_date > end_date:
+        raise HTTPException(status_code=400, detail="Start date must be before end date.")
+
+    # Calculate the number of days in the range
+    num_days = (end_date - start_date).days + 1
+    date_list = [start_date + timedelta(days=i) for i in range(num_days)]
+
+    # Prepare input data for predictions
+    input_data = pd.DataFrame([data.dict()])
+    input_data_processed = pd.get_dummies(input_data)
+    input_data_processed = input_data_processed.reindex(columns=scaler.feature_names_in_, fill_value=0)
+
+    # Scale input data
+    scaled_data = scaler.transform(input_data_processed)
+
+    # Collect temperature predictions for each day
+    predictions = []
+    for single_date in date_list:
+        # Predict temperature for each day in the range
+        predicted_temperature = logistic_model.predict(scaled_data)[0]
+
+        # Store the prediction with the date
+        predictions.append({
+            "date": single_date.strftime("%Y-%m-%d"),
+            "predicted_temperature": predicted_temperature
+        })
+
+    # Return the list of daily temperature predictions
+    return {"daily_temperature_predictions": predictions}
 
 # Custom 404 handler for non-existent routes
 @app.exception_handler(404)
