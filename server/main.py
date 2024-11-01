@@ -94,32 +94,21 @@ def predict_weather_lin(data: dict):
         raise HTTPException(status_code=500, detail="Models or scalers not loaded.")
 
 #preparing data (normalizing)
-    lin_scaler = MinMaxScaler()
+    dataframe = pd.DataFrame(data, index=[0])
+    dataframe = pd.get_dummies(dataframe, columns=['State'], prefix=['State']).astype('int64')
+
     lin_transform_data = data.drop(
         columns=['Day', 'Month', 'Year', 'State', 'Wind_Direction', 'Time_since_midnight', 'Dir_9am', 'Dir_3pm',
-                 'Temp_Diff', 'Tomorrow_Rain_Indicator', 'Tomorrow_Rain_mm'])
-    lin_scaler.fit(lin_transform_data)
-    data[lin_transform_data.columns] = scaler.transform(lin_transform_data)
+                 'Temp_Diff'])
 
-    lin_target_scaler_reg = MinMaxScaler()
-    lin_target_scaler_reg.fit(data[['Tomorrow_Rain_mm']])
-    data[['Tomorrow_Rain_mm']] = lin_target_scaler_reg.transform(data[['Tomorrow_Rain_mm']])
+    dataframe[lin_transform_data.columns] = scaler.inverse_transform(lin_transform_data)
 
-#preparing dataset (bi)
-    data_processed_linreg = pd.get_dummies(data, columns=['State'], prefix=['State']).astype('float64')
-    data_processed_linreg = data_processed_linreg.drop(['Tomorrow_Rain_Indicator'], axis=1)
-#linear reg
-    linreg = LinearRegression()
+    rain_mm_prediction = linear_model.predict(dataframe)[0]
 
-#prediction
-    after_data_linreg = data.copy().drop(['Tomorrow_Rain_Indicator'], axis=1)
-    after_data_linreg['Is predicted'] = 0
+# Return the result
+    return {"rain_mm_prediction": int(rain_mm_prediction)}
 
-    predict_data_linreg = data.copy().drop(['Tomorrow_Rain_Indicator'], axis=1)
-    predict_data_linreg['Tomorrow_Rain_mm'] = linreg.predict(data_processed_reg.drop(['Tomorrow_Rain_mm'], axis=1))
-    predict_data_linreg['Is predicted'] = 1
 
-    after_all_linreg = pd.concat([after_data_linreg, predict_data_linreg])
 
 @app.post("/api/predict_visitor_random/")
 def predict_visitor(data: dict):
