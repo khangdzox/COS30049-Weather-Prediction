@@ -2,6 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
+import About from './components/About';
+import Map from './components/Map';
+import FAQ from './components/FAQ';
 import reportWebVitals from './reportWebVitals';
 import {
   createBrowserRouter,
@@ -28,7 +31,7 @@ const router = createBrowserRouter([
     element: <FAQ/>,
   }
 
-]); 
+]);
 
 
 
