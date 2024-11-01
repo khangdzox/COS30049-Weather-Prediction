@@ -2,6 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
+import About from './components/About'; // New component
+import Map from './components/Map'; // New component
+import FAQ from './components/FAQ'; // New component
+
+
 import reportWebVitals from './reportWebVitals';
 import {
   createBrowserRouter,
@@ -14,7 +19,7 @@ const router = createBrowserRouter([
     element: <App/>,
   },
   {
-    path: "/about",
+    path: "/About",
     element: <About/>,
   }
   ,
@@ -27,7 +32,6 @@ const router = createBrowserRouter([
     path: "/faq",
     element: <FAQ/>,
   }
-
 ]); 
 
 
