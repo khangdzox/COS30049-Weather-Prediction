@@ -5,8 +5,6 @@ import App from './App';
 import About from './components/About'; // New component
 import Map from './components/Map'; // New component
 import FAQ from './components/FAQ'; // New component
-
-
 import reportWebVitals from './reportWebVitals';
 import {
   createBrowserRouter,
