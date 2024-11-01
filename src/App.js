@@ -4,6 +4,7 @@ import NavBar from './components/Navbar';
 import ForecastCard from './components/ForecastCard';
 import WeatherChart from './components/WeatherChart';
 
+
 function App() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -19,41 +20,40 @@ function App() {
   return (
     <div className="App">
       <NavBar />
-
       <div className="forecast-container">
-        {forecastData.map((data, index) => (
-          <ForecastCard key={index} data={data} />
-        ))}
-        <div className="arrow">&#8594;</div>
+        <ForecastCard data={{ date: "22/08", rain: "0mm" }} />
+        <ForecastCard data={{ date: "23/08", rain: "3mm" }} />
+        <ForecastCard data={{ date: "24/08", rain: "2mm" }} />
+        <ForecastCard data={{ date: "25/08", rain: "0mm", isToday: true }} />
+        <div className="arrow">&#8594;</div> 
+        <ForecastCard data={{ date: "26/08", rain: "0mm", isTomorrow: true }} />
       </div>
-
-      {/* Weather selector and date inputs */}
+      {/* New Selector for Rainfall, Temperature, Wind Speed and Date Inputs */}
       <div className="weather-selector">
         <select>
           <option>Rainfall</option>
           <option>Temperature</option>
           <option>Wind speed</option>
         </select>
-
+        {/* From and To Date Inputs */}
         <div className="date-inputs">
           <label>From:</label>
-          <input
-            type="date"
-            value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
+          <input 
+            type="date" 
+            value={fromDate} 
+            onChange={(e) => setFromDate(e.target.value)} 
           />
           <label>To:</label>
-          <input
-            type="date"
-            value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
+          <input 
+            type="date" 
+            value={toDate} 
+            onChange={(e) => setToDate(e.target.value)} 
           />
         </div>
       </div>
-
       <WeatherChart />
     </div>
   );
 }
-
 export default App;
+

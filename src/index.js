@@ -2,6 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
+import About from './components/About'; // New component
+import Map from './components/Map'; // New component
+import FAQ from './components/FAQ'; // New component
+
+
 import About from './components/About';
 import Map from './components/Map';
 import FAQ from './components/FAQ';
@@ -17,7 +22,7 @@ const router = createBrowserRouter([
     element: <App/>,
   },
   {
-    path: "/about",
+    path: "/About",
     element: <About/>,
   }
   ,
@@ -30,8 +35,7 @@ const router = createBrowserRouter([
     path: "/faq",
     element: <FAQ/>,
   }
-
-]);
+]); 
 
 
 
