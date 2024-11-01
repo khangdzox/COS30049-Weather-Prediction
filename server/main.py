@@ -22,7 +22,6 @@ target_scaler = None
 def read_root():
     return {"message": "Welcome to the Weather Prediction API"}
 
-# Function to load AI models and scalers
 
 # Load models at startup
 @app.on_event("startup")
