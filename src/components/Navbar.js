@@ -1,21 +1,31 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
+import {
+  AppBar,
+  Box,
+  Toolbar,
+  IconButton,
+  Typography,
+  Menu,
+  Container,
+  MenuItem,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import Container from '@mui/material/Container';
-import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
 import CloudRoundedIcon from '@mui/icons-material/CloudRounded';
 
 const NavBar = () => {
   // const [fromDate, setFromDate] = useState('');
   // const [toDate, setToDate] = useState('');
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
+  const [anchorElNav, setAnchorElNav] = useState(null);
+  const [location, setLocation] = useState('Melbourne');
+
+  const handleLocationChange = (event) => {
+    setLocation(event.target.value);
+  };
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -165,35 +175,36 @@ const NavBar = () => {
               <Link to="/faq" style={{ textDecoration: 'none', color: 'inherit' }}>FAQ</Link>
             </Button>
           </Box>
-          {/* <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: '45px' }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
+
+          <Box sx={{ flexGrow: 0 }}>
+            {/* Location Selector */}
+            <FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }} size="small">
+              <Select
+                value={location}
+                onChange={handleLocationChange}
+                displayEmpty
+                sx={{
+                  color: 'white',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  '& .MuiSvgIcon-root': {
+                    color: 'white',
+                  },
+                }}
+              >
+                <MenuItem value="" disabled>
+                  Select Location
                 </MenuItem>
-              ))}
-            </Menu>
-          </Box> */}
+                <MenuItem value="Melbourne">Melbourne</MenuItem>
+                <MenuItem value="Sydney">Sydney</MenuItem>
+                <MenuItem value="Brisbane">Brisbane</MenuItem>
+                <MenuItem value="Perth">Perth</MenuItem>
+                <MenuItem value="Adelaide">Adelaide</MenuItem>
+                <MenuItem value="Canberra">Canberra</MenuItem>
+                <MenuItem value="Hobart">Hobart</MenuItem>
+                <MenuItem value="Darwin">Darwin</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
         </Toolbar>
       </Container>
     </AppBar>
