@@ -11,7 +11,6 @@ import {
   MenuItem,
   Button,
   FormControl,
-  InputLabel,
   Select,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -36,41 +35,6 @@ const NavBar = () => {
   };
 
   return (
-    // <nav className="navbar">
-    //   <h1>Weather Forecast</h1>
-
-    //   {/* Navigation links using react-router-dom's Link */}
-    //   <div className="nav-links">
-    //     <Link to="/about">About us</Link>
-    //     <Link to="/map">Map</Link>
-    //     <Link to="/faq">FAQ</Link>
-    //   </div>
-
-    //   {/* Location Selector */}
-    //   <div className="location-selector">
-    //     <select>
-    //       <option>Melbourne</option>
-    //       <option>Sydney</option>
-    //       <option>Brisbane</option>
-    //     </select>
-    //   </div>
-
-    //   {/* Date Inputs
-    //   <div className="date-selector">
-    //     <label>From:</label>
-    //     <input
-    //       type="date"
-    //       value={fromDate}
-    //       onChange={(e) => setFromDate(e.target.value)}
-    //     />
-    //     <label>To:</label>
-    //     <input
-    //       type="date"
-    //       value={toDate}
-    //       onChange={(e) => setToDate(e.target.value)}
-    //     />
-    //   </div> */}
-    // </nav>
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
@@ -103,6 +67,14 @@ const NavBar = () => {
               onClose={handleCloseNavMenu}
               sx={{ display: { xs: 'block', md: 'none' } }}
             >
+              <MenuItem onClick={handleCloseNavMenu}>
+                <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <Typography sx={{ textAlign: 'center' }}>
+                    Home
+                  </Typography>
+                </Link>
+              </MenuItem>
+
               <MenuItem onClick={handleCloseNavMenu}>
                 <Link to="/about" style={{ textDecoration: 'none', color: 'inherit' }}>
                   <Typography sx={{ textAlign: 'center' }}>
@@ -166,11 +138,17 @@ const NavBar = () => {
 
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'center', alignItems: 'center'}}>
             <Button onClick={handleCloseNavMenu} sx={{ my: 2, color: 'white', display: 'block' }}>
+              <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>Home</Link>
+            </Button>
+
+            <Button onClick={handleCloseNavMenu} sx={{ my: 2, color: 'white', display: 'block' }}>
               <Link to="/about" style={{ textDecoration: 'none', color: 'inherit' }}>About us</Link>
             </Button>
+
             <Button onClick={handleCloseNavMenu} sx={{ my: 2, color: 'white', display: 'block' }}>
               <Link to="/map" style={{ textDecoration: 'none', color: 'inherit' }}>Map</Link>
             </Button>
+
             <Button onClick={handleCloseNavMenu} sx={{ my: 2, color: 'white', display: 'block' }}>
               <Link to="/faq" style={{ textDecoration: 'none', color: 'inherit' }}>FAQ</Link>
             </Button>

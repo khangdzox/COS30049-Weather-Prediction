@@ -2,9 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import About from './components/About'; // New component
-import Map from './components/Map'; // New component
-import FAQ from './components/FAQ'; // New component
+import Home from './pages/Home'; // New component
+import About from './pages/About'; // New component
+import Map from './pages/Map'; // New component
+import FAQ from './pages/FAQ'; // New component
 import reportWebVitals from './reportWebVitals';
 import {
   createBrowserRouter,
@@ -14,30 +15,36 @@ import {
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App/>,
+    element: <App />,
+    children: [
+      {
+        path: "/",
+        element: <Home/>,
+      },
+      {
+        path: "/about",
+        element: <About/>,
+      }
+      ,
+      {
+        path: "/map",
+        element: <Map/>,
+      }
+      ,
+      {
+        path: "/faq",
+        element: <FAQ/>,
+      }
+    ],
   },
-  {
-    path: "/about",
-    element: <About/>,
-  }
-  ,
-  {
-    path: "/map",
-    element: <Map/>,
-  }
-  ,
-  {
-    path: "/faq",
-    element: <FAQ/>,
-  }
-]); 
+]);
 
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-     <RouterProvider router={router} />
+      <RouterProvider router={router} />
   </React.StrictMode>
 );
 
