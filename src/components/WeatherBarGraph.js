@@ -78,7 +78,7 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
     .enter().append('rect')
     .attr('class', 'bar')
     .attr('x', d => x(d.date))
-    .attr('y', height - margin.bottom)
+    .attr('y', height - margin.bottom - 0.1)
     .attr('width', x.bandwidth())
     .attr('height', 0)
     .attr('fill', 'steelblue')
@@ -86,7 +86,7 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
     .transition()
     .duration(1000)
     .attr('y', d => y(d.value))
-    .attr('height', d => height - margin.bottom - y(d.value));
+    .attr('height', d => height - margin.bottom - 0.1 - y(d.value));
 
     svg.selectAll('.bar')
     .on('mouseover', (event, d) => {
