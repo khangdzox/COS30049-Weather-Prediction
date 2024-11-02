@@ -78,12 +78,14 @@ def predict_weather_log(data: dict):
     #preparing data (normalizing)
     dataframe = pd.DataFrame(data, index=[0])
 
-    dataframe = pd.get_dummies(dataframe, columns=['State'], prefix=['State']).astype('int64')
-
     log_transform_data = dataframe.drop(
         columns=['Day', 'Month', 'Year', 'State', 'Wind_Direction', 'Time_since_midnight', 'Dir_9am', 'Dir_3pm',
                  'Temp_Diff'])
     dataframe[log_transform_data.columns] = scaler.transform(log_transform_data)
+
+    dataframe = pd.get_dummies(dataframe, columns=['State'], prefix=['State']).astype('int64')
+
+    dataframe = dataframe.reindex(columns=logistic_model.feature_names_in_, fill_value=0)
 
     #logistic regression
     rain_prediction_indicator = logistic_model.predict(dataframe)[0]
@@ -100,18 +102,19 @@ def predict_weather_lin(data: dict):
 
 #preparing data (normalizing)
     dataframe = pd.DataFrame(data, index=[0])
-    dataframe = pd.get_dummies(dataframe, columns=['State'], prefix=['State']).astype('int64')
 
-    lin_transform_data = data.drop(
+    lin_transform_data = dataframe.drop(
         columns=['Day', 'Month', 'Year', 'State', 'Wind_Direction', 'Time_since_midnight', 'Dir_9am', 'Dir_3pm',
                  'Temp_Diff'])
 
     dataframe[lin_transform_data.columns] = scaler.inverse_transform(lin_transform_data)
 
-    rain_mm_prediction = linear_model.predict(dataframe)[0]
+    dataframe = pd.get_dummies(dataframe, columns=['State'], prefix=['State']).astype('int64')
+    dataframe = dataframe.reindex(columns=linear_model.feature_names_in_, fill_value=0)
 
+    rain_mm_prediction = linear_model.predict(dataframe)[0]
 # Return the result
-    return {"rain_mm_prediction": int(rain_mm_prediction)}
+    return {"rain_mm_prediction": max(0, rain_mm_prediction)}
 
 @app.post("/api/predict_visitor_random/")
 def predict_visitor(data: dict):
@@ -121,68 +124,26 @@ def predict_visitor(data: dict):
 
     #preparing data
     dataframe = pd.DataFrame(data, index=[0])
-    dataframe = pd.get_dummies(dataframe, columns=['State'], prefix=['State']).astype('int64')
 
-    visitor_transform_data = data.drop(columns=['Year', 'Month', 'State', 'Number of arriving visitors'])
+    visitor_transform_data = dataframe.drop(columns=['Year', 'Month', 'State', 'Number of arriving visitors'])
 
     dataframe[visitor_transform_data.columns] = scaler.transform(visitor_transform_data)
 
-    visitor_prediction['Number of arriving visitors'] = random_forest_model.predict(
-        visitor_transform_data.drop(dataframe)[0]
+    dataframe = pd.get_dummies(dataframe, columns=['State'], prefix=['State']).astype('int64')
+    dataframe = dataframe.reindex(columns=random_forest_model.feature_names_in_, fill_value=0)
+
+    visitor_prediction = random_forest_model.predict(
+        visitor_transform_data.drop(dataframe)[0])
 
     # Return the result
-    return {"Number of arriving visitors": int(visitor_prediction)}
+    return {"Number of arriving visitors": max(0, visitor_prediction)}
 
-@app.post("/api/predict_visitor_random/")
-def predict_visitor(data: dict):
-    # Ensure models are loaded
-    if not random_forest_model or not scaler:
-        raise HTTPException(status_code=500, detail="Models or scalers not loaded.")
+
 
 #chatgpt answer/ still nid modify
-@app.post("/predict_temperature_range/")
-def predict_temperature_range(date_range: DateRangeRequest, data: WeatherData):
-    # Ensure models are loaded
-    if not logistic_model or not scaler:
-        raise HTTPException(status_code=500, detail="Model or scaler not loaded.")
+@app.post("/data/temperature_range/")
 
-    # Parse and validate dates
-    try:
-        start_date = datetime.strptime(date_range.start_date, "%Y-%m-%d")
-        end_date = datetime.strptime(date_range.end_date, "%Y-%m-%d")
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
 
-    # Check if start_date is before end_date
-    if start_date > end_date:
-        raise HTTPException(status_code=400, detail="Start date must be before end date.")
-
-    # Calculate the number of days in the range
-    num_days = (end_date - start_date).days + 1
-    date_list = [start_date + timedelta(days=i) for i in range(num_days)]
-
-    # Prepare input data for predictions
-    input_data = pd.DataFrame([data.dict()])
-    input_data_processed = pd.get_dummies(input_data)
-    input_data_processed = input_data_processed.reindex(columns=scaler.feature_names_in_, fill_value=0)
-
-    # Scale input data
-    scaled_data = scaler.transform(input_data_processed)
-
-    # Collect temperature predictions for each day
-    predictions = []
-    for single_date in date_list:
-        # Predict temperature for each day in the range
-        predicted_temperature = logistic_model.predict(scaled_data)[0]
-
-        # Store the prediction with the date
-        predictions.append({
-            "date": single_date.strftime("%Y-%m-%d"),
-            "predicted_temperature": predicted_temperature
-        })
-
-    # Return the list of daily temperature predictions
-    return {"daily_temperature_predictions": predictions}
 
 # Custom 404 handler for non-existent routes
 @app.exception_handler(404)
