@@ -36,12 +36,13 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
   useEffect(() => {
     if (data.length === 0) return;
 
-    const svg = d3.select(svgRef.current);
-    svg.selectAll('*').remove();
-
     const width = 800;
     const height = 400;
     const margin = { top: 20, right: 30, bottom: 50, left: 40 };
+
+    const svg = d3.select(svgRef.current);
+    svg.selectAll('*').remove();
+    svg.attr('viewBox', [0, 0, width, height]);
 
     const x = d3.scalePoint()
     .domain(data.map(d => d.date))
@@ -112,9 +113,11 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
       tooltip.transition()
       .duration(200)
       .style('opacity', 1);
+
       tooltip.html(`Date: ${d.date}<br>Value: ${d.value}`)
       .style('left', `${event.pageX + 5}px`)
       .style('top', `${event.pageY - 28}px`);
+
       d3.select(event.currentTarget)
       .transition()
       .duration(200)
@@ -124,6 +127,7 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
       tooltip.transition()
       .duration(200)
       .style('opacity', 0);
+
       d3.select(event.currentTarget)
       .transition()
       .duration(200)
@@ -133,7 +137,7 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
   }, [data]);
 
   return (
-    <svg ref={svgRef} width={800} height={400}></svg>
+    <svg ref={svgRef}></svg>
   );
 };
 
