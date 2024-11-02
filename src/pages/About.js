@@ -49,7 +49,7 @@ const About = () => {
 
       <h3>Looking Ahead</h3>
       <p>
-        As we continue to explore the fields of web development and artificial intelligence, we remain committed to pushing boundaries, learning new technologies, and delivering quality applications. We invite you to follow our journey as we take on new challenges and aim for excellence in our studies and beyond!
+        As we continue to explore the fields of web development and artificial intelligence, we remain committed to pushing boundaries, learning new technologies, and delivering quality applications. We invite you to follow our journey as we take on new challenges and aim for excellence in our studies and far beyond!
       </p>
 
       <p>Let’s keep building the future of technology together!</p>
