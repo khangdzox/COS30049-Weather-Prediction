@@ -40,26 +40,26 @@ function Home() {
   return (
     <>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
-  {/* Conditionally render cards based on screen size */}
-  {isSmallScreen ? (
-    <>
-      {/* Show only the last two cards on smaller screens */}
-      <ForecastCard data={{ date: "25/08", rain: "0mm", isToday: true }} />
-      <Box sx={{ mx: 2, fontSize: '2rem' }}>&#8594;</Box>
-      <ForecastCard data={{ date: "26/08", rain: "0mm", isTomorrow: true }} />
-    </>
-  ) : (
-    <>
-      {/* Show all cards on larger screens */}
-      <ForecastCard data={{ date: "22/08", rain: "0mm" }} />
-      <ForecastCard data={{ date: "23/08", rain: "3mm" }} />
-      <ForecastCard data={{ date: "24/08", rain: "2mm" }} />
-      <ForecastCard data={{ date: "25/08", rain: "0mm", isToday: true }} />
-      <Box sx={{ mx: 2, fontSize: '2rem' }}>&#8594;</Box>
-      <ForecastCard data={{ date: "26/08", rain: "0mm", isTomorrow: true }} />
-    </>
-  )}
-</Box>
+        {/* Conditionally render cards based on screen size */}
+        {isSmallScreen ? (
+          <>
+            {/* Show only the last two cards on smaller screens */}
+            <ForecastCard data={{ date: "25/08", rain: "0mm", isToday: true }} />
+            <Box sx={{ mx: 2, fontSize: '2rem' }}>&#8594;</Box>
+            <ForecastCard data={{ date: "26/08", rain: "0mm", isTomorrow: true }} />
+          </>
+        ) : (
+          <>
+            {/* Show all cards on larger screens */}
+            <ForecastCard data={{ date: "22/08", rain: "0mm" }} />
+            <ForecastCard data={{ date: "23/08", rain: "3mm" }} />
+            <ForecastCard data={{ date: "24/08", rain: "2mm" }} />
+            <ForecastCard data={{ date: "25/08", rain: "0mm", isToday: true }} />
+            <Box sx={{ mx: 2, fontSize: '2rem' }}>&#8594;</Box>
+            <ForecastCard data={{ date: "26/08", rain: "0mm", isTomorrow: true }} />
+          </>
+        )}
+      </Box>
 
       {/* New Selector for Rainfall, Temperature, Wind Speed and Date Inputs */}
       <Box sx={{ flexGrow: 1, m: 2 }}>
