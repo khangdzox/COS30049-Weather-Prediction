@@ -1,24 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ForecastCard from '../components/ForecastCard';
 import WeatherLineGraph from '../components/WeatherLineGraph';
 import WeatherBarGraph from '../components/WeatherBarGraph';
-import { Box, Select, MenuItem, TextField, FormControl, InputLabel, Grid2 } from '@mui/material';
+import { Box, Select, MenuItem, TextField, FormControl, InputLabel, Grid2, Stack } from '@mui/material';
 
 function Home() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [weatherType, setWeatherType] = useState('Rainfall');
-  const [isSmallScreen, setIsSmallScreen] = useState(false);
-
-  useEffect(() => {
-    // Update screen size state on resize
-    const handleResize = () => setIsSmallScreen(window.innerWidth < 1050);
-    window.addEventListener('resize', handleResize);
-    handleResize(); // Initial check
-
-    // Clean up the event listener on component unmount
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const handleWeatherTypeChange = (event) => setWeatherType(event.target.value);
 
@@ -39,38 +28,41 @@ function Home() {
 
   return (
     <>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
-        {/* Conditionally render cards based on screen size */}
-        {isSmallScreen ? (
-          <>
-            {/* Show only the last two cards on smaller screens */}
-            <ForecastCard data={{ date: "25/08", rain: "0mm", isToday: true }} />
-            <Box sx={{ mx: 2, fontSize: '2rem' }}>&#8594;</Box>
-            <ForecastCard data={{ date: "26/08", rain: "0mm", isTomorrow: true }} />
-          </>
-        ) : (
-          <>
-            {/* Show all cards on larger screens */}
-            <ForecastCard data={{ date: "22/08", rain: "0mm" }} />
-            <ForecastCard data={{ date: "23/08", rain: "3mm" }} />
-            <ForecastCard data={{ date: "24/08", rain: "2mm" }} />
-            <ForecastCard data={{ date: "25/08", rain: "0mm", isToday: true }} />
-            <Box sx={{ mx: 2, fontSize: '2rem' }}>&#8594;</Box>
-            <ForecastCard data={{ date: "26/08", rain: "0mm", isTomorrow: true }} />
-          </>
-        )}
-      </Box>
+      {/* <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+
+        <Box sx={{ display: { xs: 'none', sm: 'none', md: 'none', lg: 'flex' }} }>
+          <ForecastCard date="22/08" rain="0" />
+          <ForecastCard date="23/08" rain="3" />
+          <ForecastCard date="24/08" rain="2" />
+        </Box>
+        <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+          <ForecastCard date="25/08" rain="0" isToday="true" />
+        </Box>
+        <Box sx={{ mx: 2, fontSize: '2rem', display: { xs: 'none', sm: 'block' } }}>&#8594;</Box>
+        <ForecastCard date="26/08" rain="0" isTomorrow="true" />
+
+      </Box> */}
+
+      <Stack direction='row' spacing={2} justifyContent='center'>
+        <ForecastCard date="22/08" rain="0" display={{ xs: 'none', sm: 'none', md: 'block' }} />
+        <ForecastCard date="23/08" rain="3" display={{ xs: 'none', sm: 'none', md: 'block' }} />
+        <ForecastCard date="24/08" rain="2" display={{ xs: 'none', sm: 'none', md: 'block' }} />
+        <ForecastCard date="25/08" rain="0" isToday display={{ xs: 'none', sm: 'block' }} />
+        <Box sx={{ mx: 2, fontSize: '2rem', display: { xs: 'none', sm: 'flex' }, alignItems: "center" }}>&#8594;</Box>
+        <ForecastCard date="26/08" rain="0" isTomorrow />
+      </Stack>
 
       {/* New Selector for Rainfall, Temperature, Wind Speed and Date Inputs */}
       <Box sx={{ flexGrow: 1, m: 2 }}>
         <Grid2 container spacing={2} alignItems="center" justifyContent="center">
           <Grid2 item size={{ xs: 12, sm: 4}} >
-            <FormControl variant="outlined" sx={{ minWidth: 150 }} fullWidth>
+            <FormControl variant="outlined" fullWidth>
               <InputLabel>Weather Type</InputLabel>
               <Select
                 value={weatherType}
                 onChange={handleWeatherTypeChange}
                 label="Weather Type"
+                sx={{ textAlign: 'left' }}
               >
                 <MenuItem value="Rainfall">Rainfall</MenuItem>
                 <MenuItem value="Temperature">Temperature</MenuItem>
