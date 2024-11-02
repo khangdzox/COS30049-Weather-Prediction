@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import ForecastCard from '../components/ForecastCard';
-import WeatherLineGraph from '../components/WeatherLineGraph';
-import WeatherBarGraph from '../components/WeatherBarGraph';
-import { Box, Select, MenuItem, TextField, FormControl, InputLabel, Grid2, Stack } from '@mui/material';
+import WeatherGraph from '../components/WeatherGraph';
+import { Box, Select, MenuItem, TextField, FormControl, InputLabel, Grid2, Stack} from '@mui/material';
 
 function Home() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
-  const [weatherType, setWeatherType] = useState('Rainfall');
+  const [weatherType, setWeatherType] = useState('');
 
   const handleWeatherTypeChange = (event) => setWeatherType(event.target.value);
 
@@ -28,27 +27,12 @@ function Home() {
 
   return (
     <>
-      {/* <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
-
-        <Box sx={{ display: { xs: 'none', sm: 'none', md: 'none', lg: 'flex' }} }>
-          <ForecastCard date="22/08" rain="0" />
-          <ForecastCard date="23/08" rain="3" />
-          <ForecastCard date="24/08" rain="2" />
-        </Box>
-        <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-          <ForecastCard date="25/08" rain="0" isToday="true" />
-        </Box>
-        <Box sx={{ mx: 2, fontSize: '2rem', display: { xs: 'none', sm: 'block' } }}>&#8594;</Box>
-        <ForecastCard date="26/08" rain="0" isTomorrow="true" />
-
-      </Box> */}
-
       <Stack direction='row' spacing={2} justifyContent='center'>
         <ForecastCard date="22/08" rain="0" display={{ xs: 'none', sm: 'none', md: 'block' }} />
         <ForecastCard date="23/08" rain="3" display={{ xs: 'none', sm: 'none', md: 'block' }} />
         <ForecastCard date="24/08" rain="2" display={{ xs: 'none', sm: 'none', md: 'block' }} />
         <ForecastCard date="25/08" rain="0" isToday display={{ xs: 'none', sm: 'block' }} />
-        <Box sx={{ mx: 2, fontSize: '2rem', display: { xs: 'none', sm: 'flex' }, alignItems: "center" }}>&#8594;</Box>
+        <Box sx={{ mx: 2, color: 'teal', fontSize: '2rem', display: { xs: 'none', sm: 'flex' }, alignItems: "center" }}>&#8594;</Box>
         <ForecastCard date="26/08" rain="0" isTomorrow />
       </Stack>
 
@@ -64,9 +48,11 @@ function Home() {
                 label="Weather Type"
                 sx={{ textAlign: 'left' }}
               >
-                <MenuItem value="Rainfall">Rainfall</MenuItem>
-                <MenuItem value="Temperature">Temperature</MenuItem>
-                <MenuItem value="Wind speed">Wind speed</MenuItem>
+                <MenuItem value="Rain_mm">Rainfall (mm)</MenuItem>
+                <MenuItem value="Temp_Min">Minimum Temperature (°C)</MenuItem>
+                <MenuItem value="Temp_Max">Maximum Temperature (°C)</MenuItem>
+                <MenuItem value="Evaporation_mm">Evaporation (mm)</MenuItem>
+                <MenuItem value="Wind_Speed">Maximum Wind Speed (km/h)</MenuItem>
               </Select>
             </FormControl>
           </Grid2>
@@ -78,7 +64,8 @@ function Home() {
               value={fromDate}
               onChange={handleFromDateChange}
               slotProps={{
-                inputLabel: { shrink: true }
+                inputLabel: { shrink: true },
+                htmlInput: { max: new Date().toISOString().split('T')[0] }
               }}
               fullWidth
             />
@@ -92,7 +79,7 @@ function Home() {
               onChange={handleToDateChange}
               slotProps={{
                 inputLabel: { shrink: true },
-                htmlInput: { min: fromDate }
+                htmlInput: { min: fromDate, max: new Date().toISOString().split('T')[0]}
               }}
               fullWidth
             />
@@ -101,8 +88,7 @@ function Home() {
       </Box>
 
       {/* Weather Chart */}
-      <WeatherLineGraph fromDate={fromDate} toDate={toDate} dataType={weatherType} />
-      <WeatherBarGraph fromDate={fromDate} toDate={toDate} dataType={weatherType} />
+      <WeatherGraph weatherType={weatherType} fromDate={fromDate} toDate={toDate} />
     </>
   );
 }

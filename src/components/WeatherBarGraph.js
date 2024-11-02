@@ -78,7 +78,7 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
     .enter().append('rect')
     .attr('class', 'bar')
     .attr('x', d => x(d.date))
-    .attr('y', height - margin.bottom - 0.5)
+    .attr('y', height - margin.bottom)
     .attr('width', x.bandwidth())
     .attr('height', 0)
     .attr('fill', 'steelblue')
