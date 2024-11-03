@@ -8,7 +8,7 @@ const WeatherMissingValues = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        aspectRatio: '870/470',
+        aspectRatio: '870/440',
       }}
     >
       <Typography variant="h6">
