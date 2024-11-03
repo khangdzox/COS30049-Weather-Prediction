@@ -19,11 +19,10 @@ from math import sqrt
 from sklearn.ensemble import RandomForestRegressor
 
 
-app = FastAPI()
-
 class DateRangeRequest(BaseModel):
     start_date: str  # Expecting format "YYYY-MM-DD"
     end_date: str    # Expecting format "YYYY-MM-DD"
+
 
 # Data model for weather prediction input
 class WeatherData(BaseModel):
@@ -31,11 +30,14 @@ class WeatherData(BaseModel):
     humidity: Optional[float] = None
     wind_speed: Optional[float] = None
 
+
 # Placeholders for the AI models and scalers
 logistic_model = None
 linear_model = None
+random_forest_model = None
 scaler = None
 target_scaler = None
+
 
 # Load models at startup
 def load_models():
@@ -45,6 +47,9 @@ def load_models():
     scaler = joblib.load("models/scaler.pkl")
     target_scaler = joblib.load("models/target_scaler.pkl")
     random_forest_model = joblib.load("models/random_forest_model.pkl")
+
+    print(random_forest_model)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -64,12 +69,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/api/")
 def read_root():
     return {"message": "Welcome to the Weather Prediction API"}
 
+
 # Prediction endpoint
-@app.post("/api/predict_log/")
+@app.post("/api/predict/rain_indicator/")
 def predict_weather_log(data: dict):
     # Ensure models are loaded
     if not logistic_model or not scaler:
@@ -94,7 +101,7 @@ def predict_weather_log(data: dict):
     return {"rain_prediction_indicator": int(rain_prediction_indicator)}
 
 
-@app.post("/api/predict_lin/")
+@app.post("/api/predict/rain_mm")
 def predict_weather_lin(data: dict):
     # Ensure models are loaded
     if not linear_model or not scaler:
@@ -116,7 +123,8 @@ def predict_weather_lin(data: dict):
 # Return the result
     return {"rain_mm_prediction": max(0, rain_mm_prediction)}
 
-@app.post("/api/predict_visitor_random/")
+
+@app.post("/api/predict/visitor")
 def predict_visitor(data: dict):
     # Ensure models are loaded
     if not random_forest_model or not scaler:
@@ -125,24 +133,69 @@ def predict_visitor(data: dict):
     #preparing data
     dataframe = pd.DataFrame(data, index=[0])
 
-    visitor_transform_data = dataframe.drop(columns=['Year', 'Month', 'State', 'Number of arriving visitors'])
-
-    dataframe[visitor_transform_data.columns] = scaler.transform(visitor_transform_data)
-
     dataframe = pd.get_dummies(dataframe, columns=['State'], prefix=['State']).astype('int64')
     dataframe = dataframe.reindex(columns=random_forest_model.feature_names_in_, fill_value=0)
 
-    visitor_prediction = random_forest_model.predict(
-        visitor_transform_data.drop(dataframe)[0])
+    visitor_prediction = random_forest_model.predict(dataframe)[0]
 
     # Return the result
     return {"Number of arriving visitors": max(0, visitor_prediction)}
 
 
-
 #chatgpt answer/ still nid modify
-@app.post("/data/temperature_range/")
+# @app.post("/data/temperature_range/")
+# def predict_temperature_range(date_range: DateRangeRequest, data: WeatherData):
+#     # Ensure models are loaded
+#     if not temperature_model or not scaler:
+#         raise HTTPException(status_code=500, detail="Model or scaler not loaded.")
+#
+#     # Parse and validate dates
+#     try:
+#         start_date = datetime.strptime(date_range.start_date, "%Y-%m-%d")
+#         end_date = datetime.strptime(date_range.end_date, "%Y-%m-%d")
+#     except ValueError:
+#         raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+#
+#     # Check if start_date is before end_date
+#     if start_date > end_date:
+#         raise HTTPException(status_code=400, detail="Start date must be before end date.")
+#
+#     # Calculate the number of days in the range
+#     num_days = (end_date - start_date).days + 1
+#     date_list = [start_date + timedelta(days=i) for i in range(num_days)]
+#
+#     # Prepare input data for predictions
+#     input_data = pd.DataFrame([data.dict()])
+#     input_data_processed = pd.get_dummies(input_data)
+#     input_data_processed = input_data_processed.reindex(columns=scaler.feature_names_in_, fill_value=0)
+#
+#     # Scale input data
+#     scaled_data = scaler.transform(input_data_processed)
+#
+#     # Collect temperature predictions for each day
+#     predictions = []
+#     for single_date in date_list:
+#         # Predict temperature for each day in the range
+#         predicted_temperature = temperature_model.predict(scaled_data)[0]
+#
+#         # Store the prediction with the date
+#         predictions.append({
+#             "date": single_date.strftime("%Y-%m-%d"),
+#             "predicted_temperature": predicted_temperature
+#         })
+#
+#     # Return the list of daily temperature predictions
+#     return {"daily_temperature_predictions": predictions}
 
+
+@app.get('/api/data/weather')
+def get_weather_data(weatherType, fromDate, toDate):
+    pass
+
+
+@app.get('/api/data/visitors')
+def get_visitors_data(weatherType, fromDate, toDate):
+    pass
 
 
 # Custom 404 handler for non-existent routes
