@@ -2,7 +2,7 @@ import React from 'react';
 
 const FAQ = () => {
   return (
-    <div style={{ backgroundColor: '#b3d9ff', padding: '20px' }}>
+    <div style={{ backgroundColor: '#b3d9ff', padding: '20px', textAlign: 'left' }}>
       <h2>Frequently Asked Questions (FAQ)</h2>
 
       <h3>How to set the date?</h3>

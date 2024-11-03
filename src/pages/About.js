@@ -2,7 +2,7 @@ import React from 'react';
 
 const About = () => {
   return (
-    <div style={{ backgroundColor: '#d4f5d4', padding: '20px' }}>
+    <div style={{ backgroundColor: '#d4f5d4', padding: '20px', textAlign: 'left' }}>
       <h2>About Us</h2>
       <p>
         Welcome to our project page! We are <strong>SEA Group</strong>, a team of passionate computer science students specializing in <strong>Full-Stack Web Development and AI applications</strong> as part of our Bachelor's studies. Under the expert guidance of <strong>Mr. Hao Zhang</strong>, our tutor, we’ve tackled complex challenges in software development and successfully completed two major assignments, enhancing our skills and understanding in the field.
