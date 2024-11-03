@@ -68,35 +68,43 @@ const NavBar = () => {
               sx={{ display: { xs: 'block', md: 'none' } }}
             >
               <MenuItem onClick={handleCloseNavMenu}>
-                <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <Typography sx={{ textAlign: 'center' }}>
-                    Home
-                  </Typography>
-                </Link>
+                <Typography
+                sx={{ textAlign: 'center', color: 'inherit', textDecoration: 'none' }}
+                component={Link}
+                to="/"
+                >
+                  Home
+                </Typography>
               </MenuItem>
 
               <MenuItem onClick={handleCloseNavMenu}>
-                <Link to="/about" style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <Typography sx={{ textAlign: 'center' }}>
-                    About us
-                  </Typography>
-                </Link>
+                <Typography
+                sx={{ textAlign: 'center', color: 'inherit', textDecoration: 'none' }}
+                component={Link}
+                to="/about"
+                >
+                  About us
+                </Typography>
               </MenuItem>
 
               <MenuItem onClick={handleCloseNavMenu}>
-                <Link to="/map" style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <Typography sx={{ textAlign: 'center' }}>
-                    Map
-                  </Typography>
-                </Link>
+                <Typography
+                sx={{ textAlign: 'center', color: 'inherit', textDecoration: 'none' }}
+                component={Link}
+                to="/map"
+                >
+                  Map
+                </Typography>
               </MenuItem>
 
               <MenuItem onClick={handleCloseNavMenu}>
-                <Link to="/faq" style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <Typography sx={{ textAlign: 'center' }}>
-                    FAQ
-                  </Typography>
-                </Link>
+                <Typography
+                sx={{ textAlign: 'center', color: 'inherit', textDecoration: 'none' }}
+                component={Link}
+                to="/faq"
+                >
+                  FAQ
+                </Typography>
               </MenuItem>
             </Menu>
           </Box>
@@ -137,20 +145,40 @@ const NavBar = () => {
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'center', alignItems: 'center'}}>
-            <Button onClick={handleCloseNavMenu} sx={{ my: 2, color: 'white', display: 'block' }}>
-              <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>Home</Link>
+            <Button
+            onClick={handleCloseNavMenu}
+            sx={{ my: 2, color: 'white', display: 'block' }}
+            component={Link}
+            to="/"
+            >
+              Home
             </Button>
 
-            <Button onClick={handleCloseNavMenu} sx={{ my: 2, color: 'white', display: 'block' }}>
-              <Link to="/about" style={{ textDecoration: 'none', color: 'inherit' }}>About us</Link>
+            <Button
+            onClick={handleCloseNavMenu}
+            sx={{ my: 2, color: 'white', display: 'block' }}
+            component={Link}
+            to="/about"
+            >
+              About us
             </Button>
 
-            <Button onClick={handleCloseNavMenu} sx={{ my: 2, color: 'white', display: 'block' }}>
-              <Link to="/map" style={{ textDecoration: 'none', color: 'inherit' }}>Map</Link>
+            <Button
+            onClick={handleCloseNavMenu}
+            sx={{ my: 2, color: 'white', display: 'block' }}
+            component={Link}
+            to="/map"
+            >
+              Map
             </Button>
 
-            <Button onClick={handleCloseNavMenu} sx={{ my: 2, color: 'white', display: 'block' }}>
-              <Link to="/faq" style={{ textDecoration: 'none', color: 'inherit' }}>FAQ</Link>
+            <Button
+            onClick={handleCloseNavMenu}
+            sx={{ my: 2, color: 'white', display: 'block' }}
+            component={Link}
+            to="/faq"
+            >
+              FAQ
             </Button>
           </Box>
 
