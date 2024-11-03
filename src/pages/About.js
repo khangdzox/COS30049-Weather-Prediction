@@ -4,12 +4,12 @@ import React from 'react';
 const About = () => {
   return (
     <Box sx={{ backgroundColor: '#d4f5d4', padding: '20px', textAlign: 'left' }}>
-      <Typography variant="h2" gutterBottom>About Us</Typography>
+      <Typography variant="h2" gutterBottom align='center'>About Us</Typography>
       <Typography variant="body1" gutterBottom>
         Welcome to our project page! We are <strong>SEA Group</strong>, a team of passionate computer science students specializing in <strong>Full-Stack Web Development and AI applications</strong> as part of our Bachelor's studies. Under the expert guidance of <strong>Mr. Hao Zhang</strong>, our tutor, we’ve tackled complex challenges in software development and successfully completed two major assignments, enhancing our skills and understanding in the field.
       </Typography>
 
-      <Typography variant="h3" gutterBottom>Meet the Team</Typography>
+      <Typography variant="h4" gutterBottom>Meet the Team</Typography>
 
       <ul>
         <li>
@@ -40,13 +40,13 @@ const About = () => {
         </li>
       </ul>
 
-      <Typography variant="h3" gutterBottom>Our Journey</Typography>
+      <Typography variant="h4" gutterBottom>Our Journey</Typography>
 
       <Typography variant="body1" gutterBottom>
         Throughout our journey, we have applied our combined skills to develop robust, user-centered applications. We work collaboratively to analyze problems, share knowledge, and find solutions together. With each assignment, we've grown stronger as a team and gained valuable hands-on experience in full-stack development and AI-driven applications.
       </Typography>
 
-      <Typography variant="h3" gutterBottom>Looking Ahead</Typography>
+      <Typography variant="h4" gutterBottom>Looking Ahead</Typography>
 
       <Typography variant="body1" gutterBottom>
         As we continue to explore the fields of web development and artificial intelligence, we remain committed to pushing boundaries, learning new technologies, and delivering quality applications. We invite you to follow our journey as we take on new challenges and aim for excellence in our studies and far beyond!
