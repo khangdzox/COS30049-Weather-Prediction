@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-const WeatherLineGraph = ({ data, dataName, displayName }) => {
+const LineGraph = ({ data, dataName, displayName }) => {
   const svgRef = useRef();
 
   const lineAnimationDuration = 500;
@@ -179,4 +179,4 @@ const WeatherLineGraph = ({ data, dataName, displayName }) => {
   );
 };
 
-export default WeatherLineGraph;
+export default LineGraph;

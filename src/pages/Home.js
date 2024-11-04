@@ -1,10 +1,10 @@
 import ClearIcon from '@mui/icons-material/Clear';
 import SaveIcon from '@mui/icons-material/Save';
 import { Alert, Box, Button, FormControl, Grid2, InputLabel, MenuItem, Paper, Select, Stack, TextField, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ForecastCard from '../components/ForecastCard';
-import WeatherBarGraph from '../components/WeatherBarGraph';
-import WeatherLineGraph from '../components/WeatherLineGraph';
+import BarGraph from '../components/BarGraph';
+import LineGraph from '../components/LineGraph';
 
 const mapNameToLabel = {
   Date: 'Date',
@@ -45,6 +45,7 @@ function Home() {
   const [weatherType, setWeatherType] = useState('');
   const [formResult, setFormResults] = useState({severity: '', message: ''});
   const [missingFields, setMissingFields] = useState([]);
+  const [graphData, setGraphData] = useState([]);
   const [formData, setFormData] = useState({
     Day: '',
     Month: '',
@@ -221,6 +222,32 @@ function Home() {
       setToDate(newToDate);
     }
   };
+
+  useEffect(() => {
+  // fetch(`http://localhost:3000/data/weather/${dataType}?from=${fromDate}&to=${toDate}`)
+  // .then(response => response.json())
+  // .then(data => setData(data))
+  // .catch(error => console.error('Error fetching data:', error));
+
+    setGraphData([
+      { "Date": '2024-09-10', [weatherType]: 0.2 },
+      { "Date": '2024-09-11', [weatherType]: 0 },
+      { "Date": '2024-09-12', [weatherType]: 8.2 },
+      { "Date": '2024-09-13', [weatherType]: 0 },
+      { "Date": '2024-09-14', [weatherType]: 3.4 },
+      { "Date": '2024-09-15', [weatherType]: 2.2 },
+      { "Date": '2024-09-16', [weatherType]: 0 },
+      { "Date": '2024-09-17', [weatherType]: 1.4 },
+      { "Date": '2024-09-18', [weatherType]: 0 },
+      { "Date": '2024-09-19', [weatherType]: 0.4 },
+      { "Date": '2024-09-20', [weatherType]: 1.4 },
+      { "Date": '2024-09-21', [weatherType]: 6.4 },
+      { "Date": '2024-09-22', [weatherType]: 0.2 },
+      { "Date": '2024-09-23', [weatherType]: 0.2 },
+      { "Date": '2024-09-24', [weatherType]: 0 },
+      { "Date": '2024-09-25', [weatherType]: 1.2 }
+    ])
+  }, [fromDate, toDate, weatherType]);
 
   return (
     <>
@@ -439,9 +466,9 @@ function Home() {
           {!weatherType || !toDate || !fromDate ? (
             <Alert severity="info">Please select a weather type, from date and to date to display the graph</Alert>
           ) : mapWeatherTypeToGraphType(weatherType) === 'line' ? (
-            <WeatherLineGraph fromDate={fromDate} toDate={toDate} dataType={weatherType} />
+            <LineGraph data={graphData} dataName={weatherType} displayName={mapNameToLabel[weatherType]} />
           ) : (
-            <WeatherBarGraph fromDate={fromDate} toDate={toDate} dataType={weatherType} />
+            <BarGraph data={graphData} dataName={weatherType} displayName={mapNameToLabel[weatherType]} />
           )}
         </Paper>
       </Box>
