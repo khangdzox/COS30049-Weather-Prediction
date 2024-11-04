@@ -1,43 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
-  const [data, setData] = useState([]);
+const WeatherLineGraph = ({ data, dataName, displayName }) => {
   const svgRef = useRef();
-
-  useEffect(() => {
-    // fetch(`http://localhost:3000/data/weather/${dataType}?from=${fromDate}&to=${toDate}`)
-    //     .then(response => response.json())
-    //     .then(data => setData(data))
-    //     .catch(error => console.error('Error fetching data:', error));
-
-    // [0.2, 0, 8.2, 0, 3.4, 2.2, 0, 1.4, 0, 0.4, 1.4, 6.4, 0.2, 0.2, 0, 1.2]
-    setData([
-      { date: '2024-09-10', value: 0.2 },
-      { date: '2024-09-11', value: 0 },
-      { date: '2024-09-12', value: 8.2 },
-      { date: '2024-09-13', value: 0 },
-      { date: '2024-09-14', value: 3.4 },
-      { date: '2024-09-15', value: 2.2 },
-      { date: '2024-09-16', value: 0 },
-      { date: '2024-09-17', value: 1.4 },
-      { date: '2024-09-18', value: 0 },
-      { date: '2024-09-19', value: 0.4 },
-      { date: '2024-09-20', value: 1.4 },
-      { date: '2024-09-21', value: 6.4 },
-      { date: '2024-09-22', value: 0.2 },
-      { date: '2024-09-23', value: 0.2 },
-      { date: '2024-09-24', value: 0 },
-      { date: '2024-09-25', value: 1.2 }
-    ])
-  }, [dataType, fromDate, toDate]);
 
   useEffect(() => {
     if (data.length === 0) return;
 
     const width = 800;
     const height = 400;
-    const margin = { top: 20, right: 30, bottom: 20, left: 40 };
+    const margin = { top: 20, right: 30, bottom: 40, left: 40 };
 
     // Define the SVG element
     const svg = d3.select(svgRef.current);
@@ -49,12 +21,12 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
 
     // Define a time scale to get the tick format
     const tickFormat = d3.scaleTime()
-    .domain(d3.extent(data, d => timeParse(d.date)))
+    .domain(d3.extent(data, d => timeParse(d["Date"])))
     .tickFormat();
 
     // Create the horizontal scale
     const x = d3.scaleBand()
-    .domain(data.map(d => d.date))
+    .domain(data.map(d => d["Date"]))
     .range([margin.left, width - margin.right])
     .padding(0.1);
 
@@ -62,7 +34,7 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
 
     // Create the vertical scale
     const y = d3.scaleLinear()
-    .domain([0, d3.max(data, d => d.value)]).nice()
+    .domain([0, d3.max(data, d => d[dataName])]).nice()
     .range([height - margin.bottom, margin.top]);
 
     // Define the tooltip
@@ -90,7 +62,7 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
     .enter().append('rect')
     .attr('clip-path', 'url(#clip)')
     .attr('class', 'bar')
-    .attr('x', d => x(d.date))
+    .attr('x', d => x(d["Date"]))
     .attr('y', height - margin.bottom)
     .attr('width', x.bandwidth())
     .attr('height', 0)
@@ -98,21 +70,34 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
     .attr('stroke-width', 2)
     .transition()
     .duration(1000)
-    .attr('y', d => y(d.value))
-    .attr('height', d => height - margin.bottom - y(d.value));
+    .attr('y', d => y(d[dataName]))
+    .attr('height', d => height - margin.bottom - y(d[dataName]));
 
-    // Draw the horizontal axis
+    // Draw the horizontal axis and the labels
     svg.append('g')
     .attr('class', 'x-axis')
     .attr('transform', `translate(0,${height - margin.bottom})`)
     .attr('clip-path', 'url(#clip)')
     .call(xAxis);
 
-    // Draw the vertical axis
+    svg.append('text')
+    .attr('x', width / 2)
+    .attr('y', height - 5)
+    .attr('text-anchor', 'middle')
+    .text('Date');
+
+    // Draw the vertical axis and the labels
     svg.append('g')
     .attr('class', 'y-axis')
     .attr('transform', `translate(${margin.left},0)`)
     .call(d3.axisLeft(y));
+
+    svg.append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -height / 2)
+    .attr('y', 15)
+    .attr('text-anchor', 'middle')
+    .text(displayName);
 
     // Add tooltip interactivity
     svg.selectAll('.bar')
@@ -121,7 +106,7 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
       .duration(200)
       .style('opacity', 1);
 
-      tooltip.html(`Date: ${d.date}<br>Value: ${d.value}`)
+      tooltip.html(`Date: ${d["Date"]}<br>Value: ${d[dataName]}`)
       .style('left', `${event.pageX + 5}px`)
       .style('top', `${event.pageY - 28}px`);
 
@@ -151,7 +136,7 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
       .extent(extent)
       .on('zoom', (event) => {
         x.range([margin.left, width - margin.right].map(d => event.transform.applyX(d)));
-        svg.selectAll('.bar').attr('x', d => x(d.date)).attr('width', x.bandwidth());
+        svg.selectAll('.bar').attr('x', d => x(d["Date"])).attr('width', x.bandwidth());
         svg.selectAll('.x-axis').call(xAxis);
       });
 
@@ -160,7 +145,7 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
 
     svg.call(zoom);
 
-  }, [data]);
+  });
 
   return (
     <svg ref={svgRef}></svg>

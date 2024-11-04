@@ -56,7 +56,7 @@ const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) =
 
     const width = 800;
     const height = 600;
-    const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+    const margin = { top: 20, right: 70, bottom: 40, left: 70 };
 
     // Define the SVG element
     const svg = d3.select(svgRef.current);
@@ -65,7 +65,7 @@ const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) =
 
     // Create the horizontal scale
     const x = d3.scaleLinear()
-    .domain(d3.extent(data, d => d.first))
+    .domain(d3.extent(data, d => d.second))
     .nice()
     .range([margin.left, width - margin.right]);
 
@@ -73,7 +73,7 @@ const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) =
 
     // Create the vertical scale
     const y = d3.scaleLinear()
-    .domain(d3.extent(data, d => d.second))
+    .domain(d3.extent(data, d => d.first))
     .nice()
     .range([height - margin.bottom, margin.top]);
 
@@ -96,8 +96,8 @@ const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) =
     .join('circle')
     .attr('class', 'circle')
     .attr('clip-path', 'url(#clip)')
-    .attr('cx', d => x(d.first))
-    .attr('cy', d => y(d.second))
+    .attr('cy', d => y(d.first))
+    .attr('cx', d => x(d.second))
     .attr('r', 5)
     .attr('fill', 'steelblue');
 
@@ -110,17 +110,30 @@ const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) =
     .attr('width', width - margin.left - margin.right)
     .attr('height', height - margin.top - margin.bottom);
 
-    // Draw the horizontal axis
+    // Draw the horizontal axis and the labels
     svg.append('g')
     .attr('class', 'x-axis')
     .attr('transform', `translate(0,${height - margin.bottom})`)
     .call(xAxis);
 
-    // Draw the vertical axis
+    svg.append('text')
+    .attr('x', width / 2)
+    .attr('y', height - 5)
+    .attr('text-anchor', 'middle')
+    .text(secondCol);
+
+    // Draw the vertical axis and the labels
     svg.append('g')
     .attr('class', 'y-axis')
     .attr('transform', `translate(${margin.left},0)`)
     .call(yAxis);
+
+    svg.append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -height / 2)
+    .attr('y', 15)
+    .attr('text-anchor', 'middle')
+    .text(firstCol);
 
     // Add tooltip interactivity
     svg.selectAll('circle')
@@ -162,8 +175,8 @@ const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) =
       svg.selectAll('.y-axis').call(yAxis.scale(newY));
 
       svg.selectAll('circle')
-      .attr('cx', d => newX(d.first))
-      .attr('cy', d => newY(d.second));
+      .attr('cy', d => newY(d.first))
+      .attr('cx', d => newX(d.second));
     });
 
     svg.call(zoom);
