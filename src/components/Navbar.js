@@ -16,6 +16,14 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import CloudRoundedIcon from '@mui/icons-material/CloudRounded';
 
+const mapLinkToLabel = {
+  '/': 'Home',
+  '/visitor': 'Visitor',
+  '/about': 'About us',
+  '/map': 'Map',
+  '/faq': 'FAQ',
+}
+
 const NavBar = () => {
   // const [fromDate, setFromDate] = useState('');
   // const [toDate, setToDate] = useState('');
@@ -67,45 +75,17 @@ const NavBar = () => {
               onClose={handleCloseNavMenu}
               sx={{ display: { xs: 'block', md: 'none' } }}
             >
-              <MenuItem onClick={handleCloseNavMenu}>
-                <Typography
-                sx={{ textAlign: 'center', color: 'inherit', textDecoration: 'none' }}
-                component={Link}
-                to="/"
-                >
-                  Home
-                </Typography>
-              </MenuItem>
-
-              <MenuItem onClick={handleCloseNavMenu}>
-                <Typography
-                sx={{ textAlign: 'center', color: 'inherit', textDecoration: 'none' }}
-                component={Link}
-                to="/about"
-                >
-                  About us
-                </Typography>
-              </MenuItem>
-
-              <MenuItem onClick={handleCloseNavMenu}>
-                <Typography
-                sx={{ textAlign: 'center', color: 'inherit', textDecoration: 'none' }}
-                component={Link}
-                to="/map"
-                >
-                  Map
-                </Typography>
-              </MenuItem>
-
-              <MenuItem onClick={handleCloseNavMenu}>
-                <Typography
-                sx={{ textAlign: 'center', color: 'inherit', textDecoration: 'none' }}
-                component={Link}
-                to="/faq"
-                >
-                  FAQ
-                </Typography>
-              </MenuItem>
+              {Object.entries(mapLinkToLabel).map(([link, label]) => (
+                <MenuItem key={link} onClick={handleCloseNavMenu}>
+                  <Typography
+                    sx={{ textAlign: 'center', color: 'inherit', textDecoration: 'none' }}
+                    component={Link}
+                    to={link}
+                  >
+                    {label}
+                  </Typography>
+                </MenuItem>
+              ))}
             </Menu>
           </Box>
 
@@ -145,41 +125,16 @@ const NavBar = () => {
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'center', alignItems: 'center'}}>
-            <Button
-            onClick={handleCloseNavMenu}
-            sx={{ my: 2, color: 'white', display: 'block' }}
-            component={Link}
-            to="/"
-            >
-              Home
-            </Button>
-
-            <Button
-            onClick={handleCloseNavMenu}
-            sx={{ my: 2, color: 'white', display: 'block' }}
-            component={Link}
-            to="/about"
-            >
-              About us
-            </Button>
-
-            <Button
-            onClick={handleCloseNavMenu}
-            sx={{ my: 2, color: 'white', display: 'block' }}
-            component={Link}
-            to="/map"
-            >
-              Map
-            </Button>
-
-            <Button
-            onClick={handleCloseNavMenu}
-            sx={{ my: 2, color: 'white', display: 'block' }}
-            component={Link}
-            to="/faq"
-            >
-              FAQ
-            </Button>
+            {Object.entries(mapLinkToLabel).map(([link, label]) => (
+              <Button
+                key={link}
+                sx={{ mx: 2, color: 'white' }}
+                component={Link}
+                to={link}
+              >
+                {label}
+              </Button>
+            ))}
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>

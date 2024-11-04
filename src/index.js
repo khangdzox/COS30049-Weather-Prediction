@@ -2,10 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import Home from './pages/Home'; // New component
-import About from './pages/About'; // New component
-import Map from './pages/Map'; // New component
-import FAQ from './pages/FAQ'; // New component
+import Home from './pages/Home';
+import About from './pages/About';
+import Map from './pages/Map';
+import FAQ from './pages/FAQ';
+import Visitor from './pages/Visitor';
 import reportWebVitals from './reportWebVitals';
 import {
   createBrowserRouter,
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
       {
         path: "/faq",
         element: <FAQ/>,
+      },
+      {
+        path: "/visitor",
+        element: <Visitor/>,
       }
     ],
   },
