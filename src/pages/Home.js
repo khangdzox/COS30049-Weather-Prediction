@@ -1,9 +1,10 @@
+import ClearIcon from '@mui/icons-material/Clear';
+import SaveIcon from '@mui/icons-material/Save';
+import { Alert, Box, Button, FormControl, Grid2, InputLabel, MenuItem, Paper, Select, Stack, TextField, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import ForecastCard from '../components/ForecastCard';
-import WeatherGraph from '../components/WeatherGraph';
-import { Box, Select, MenuItem, TextField, FormControl, InputLabel, Grid2, Stack, Typography, Button, Alert } from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
-import ClearIcon from '@mui/icons-material/Clear';
+import WeatherBarGraph from '../components/WeatherBarGraph';
+import WeatherLineGraph from '../components/WeatherLineGraph';
 
 const mapNameToLabel = {
   Date: 'Date',
@@ -28,6 +29,14 @@ const mapNameToLabel = {
   Dir_3pm: 'Wind Direction at 3pm',
   Spd_3pm: 'Wind Speed at 3pm (km/h)',
   MSLP_3pm: 'MSLP at 3pm',
+}
+
+const mapWeatherTypeToGraphType = (weatherType) => {
+  if (['Rain_mm', 'Evaporation_mm', 'Wind_Speed'].includes(weatherType)) {
+    return 'bar';
+  } else {
+    return 'line';
+  }
 }
 
 function Home() {
@@ -426,7 +435,15 @@ function Home() {
         </Grid2>
 
         {/* Weather Chart */}
-        <WeatherGraph weatherType={weatherType} fromDate={fromDate} toDate={toDate} />
+        <Paper elevation={3} sx={{ mt: 2, mb: 2, p: 2 }}>
+          {!weatherType || !toDate || !fromDate ? (
+            <Alert severity="info">Please select a weather type, from date and to date to display the graph</Alert>
+          ) : mapWeatherTypeToGraphType(weatherType) === 'line' ? (
+            <WeatherLineGraph fromDate={fromDate} toDate={toDate} dataType={weatherType} />
+          ) : (
+            <WeatherBarGraph fromDate={fromDate} toDate={toDate} dataType={weatherType} />
+          )}
+        </Paper>
       </Box>
 
     </>
