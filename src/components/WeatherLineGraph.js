@@ -98,6 +98,14 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
     .style('opacity', 0)
     .style('pointer-events', 'none');
 
+    // Add clip path to prevent overflowing
+    svg.append('clipPath')
+    .attr('id', 'clip')
+    .append('rect')
+    .attr('x', margin.left)
+    .attr('width', width - margin.left - margin.right)
+    .attr('height', height);
+
     // Create the dots
     svg.selectAll('.dot')
     .data(data)
@@ -165,19 +173,10 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
 
       path.attr('d', line.x(d => newX(timeParse(d.date))));
 
-      svg.selectAll('.dot')
-        .attr('cx', d => newX(timeParse(d.date)));
+      svg.selectAll('.dot').attr('cx', d => newX(timeParse(d.date)));
     });
 
     svg.call(zoom);
-
-    // Add clip path to prevent bars from overflowing
-    svg.append('clipPath')
-    .attr('id', 'clip')
-    .append('rect')
-    .attr('x', margin.left)
-    .attr('width', width - margin.left - margin.right)
-    .attr('height', height);
 
   }, [data]);
 

@@ -76,6 +76,14 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
     .style('opacity', 0)
     .style('pointer-events', 'none');
 
+    // Add clip path to prevent bars from overflowing
+    svg.append('clipPath')
+    .attr('id', 'clip')
+    .append('rect')
+    .attr('x', margin.left)
+    .attr('width', width - margin.left - margin.right)
+    .attr('height', height);
+
     // Create the bars
     svg.selectAll('.bar')
     .data(data)
@@ -122,7 +130,7 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
       .duration(200)
       .attr('fill', 'lightsteelblue');
     })
-    .on('mouseout', (event, d) => {
+    .on('mouseout', (event) => {
       tooltip.transition()
       .duration(200)
       .style('opacity', 0);
@@ -151,14 +159,6 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
     }
 
     svg.call(zoom);
-
-    // Add clip path to prevent bars from overflowing
-    svg.append('clipPath')
-    .attr('id', 'clip')
-    .append('rect')
-    .attr('x', margin.left)
-    .attr('width', width - margin.left - margin.right)
-    .attr('height', height);
 
   }, [data]);
 
