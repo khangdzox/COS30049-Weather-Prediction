@@ -18,15 +18,25 @@ const LineGraph = ({ data, dataName, displayName }) => {
     svg.selectAll('*').remove();
     svg.attr('viewBox', [0, 0, width, height]);
 
-    // Define the time parser and formatter
-    const timeParse = d3.timeParse('%Y-%m-%d');
+    let timeParse;
+    let xFrequency;
+
+    // Define the time parser and x-ticks frequency
+    if (data[0]["Date"].split('-').length === 3) {
+      timeParse = d3.timeParse('%Y-%m-%d');
+      xFrequency = d3.timeDay.every(1);
+    } else {
+      // Define the time parser and formatter
+      timeParse = d3.timeParse('%Y-%m');
+      xFrequency = d3.timeMonth.every(1);
+    }
 
     // Create the horizontal scale
     const x = d3.scaleTime()
     .domain(d3.extent(data, d => timeParse(d["Date"])))
     .range([margin.left, width - margin.right]);
 
-    const xAxis = d3.axisBottom(x).ticks(d3.timeDay.every(1));
+    const xAxis = d3.axisBottom(x).ticks(xFrequency);
 
     // Create the vertical scale
     const y = d3.scaleLinear()
