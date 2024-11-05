@@ -18,6 +18,8 @@ const mapNameToLabel = {
 
 function Home() {
   const [location, setLocation] = useOutletContext();
+  const [isLoadingFirst, setIsLoadingFirst] = useState(false);
+  const [isLoadingSecond, setIsLoadingSecond] = useState(false);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [firstCol, setfirstCol] = useState('');
@@ -117,24 +119,34 @@ function Home() {
   };
 
   useEffect(() => {
+    setFirstData([]);
+
     if (location && firstCol && fromDate && toDate) {
+      setIsLoadingFirst(true);
       fetch(`http://localhost:8000/api/data/visitors?state=${location}&columns=${firstCol}&fromDate=${fromDate}&toDate=${toDate}`)
       .then(response => response.json())
-      .then(data => setFirstData(data))
+      .then(data => {
+        setFirstData(data)
+        setIsLoadingFirst(false);
+      })
       .catch(error => console.error('Error fetching data:', error));
     }
   }, [location, firstCol, fromDate, toDate]);
 
   useEffect(() => {
+    setSecondData([]);
+
     if (location && secondCol && fromDate && toDate) {
-      if (secondCol === 'Date') {
-        setSecondData([]);
-        return;
-      }
+      setIsLoadingSecond(true);
+
+      if (secondCol === 'Date') {setIsLoadingSecond(false); return;}
 
       fetch(`http://localhost:8000/api/data/visitors?state=${location}&columns=${secondCol}&fromDate=${fromDate}&toDate=${toDate}`)
       .then(response => response.json())
-      .then(data => setSecondData(data))
+      .then(data => {
+        setSecondData(data);
+        setIsLoadingSecond(false);
+      })
       .catch(error => console.error('Error fetching data:', error));
     }
   }, [location, secondCol, fromDate, toDate]);
@@ -329,6 +341,8 @@ function Home() {
         <Paper elevation={3} sx={{ mt: 2, mb: 2, p: 2 }}>
           {(!firstCol || !secondCol || !fromDate || !toDate) ? (
             <Alert severity="info">Please select the weather types and dates to display the chart.</Alert>
+          ) : (isLoadingFirst || isLoadingSecond) ? (
+            <Alert severity="info">Loading...</Alert>
           ) : (secondCol === "Date") ? (
             <LineGraph data={firstData} dataName={firstCol} displayName={mapNameToLabel[firstCol]}/>
           ) : (
