@@ -1,11 +1,29 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import AusMap from '../components/AusMap';
 
 const Map = () => {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    // fetch('https://api.weather.gov.au/rainfall')
+    //   .then(response => response.json())
+    //   .then(data => setData(data));
+
+    // Mock data
+    setData([
+      { 'State': 'NSW', 'Temp_Max': 20 },
+      { 'State': 'VIC', 'Temp_Max': 30 },
+      { 'State': 'QLD', 'Temp_Max': 40 },
+      { 'State': 'SA', 'Temp_Max': 50 },
+      { 'State': 'WA', 'Temp_Max': 60 },
+      { 'State': 'TAS', 'Temp_Max': 70 },
+      { 'State': 'NT', 'Temp_Max': 80 },
+      { 'State': 'ACT', 'Temp_Max': 90 },
+    ]);
+  }, []);
+
   return (
-    <div>
-      <h2>Map</h2>
-      <p>This is the Map page content.</p>
-    </div>
+    <AusMap data={data} dataName='Temp_Max' displayName='Maximum Temperature (°C)' />
   );
 };
 
