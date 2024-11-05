@@ -1,62 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) => {
-  const [firstData, setFirstData] = useState([]);
-  const [secondData, setSecondData] = useState([]);
+const ScatterGraph = ({ firstData, firstDataName, firstDisplayName, secondData, secondDataName, secondDisplayName }) => {
   const svgRef = useRef();
-
-  useEffect(() => {
-    // fetch(`http://localhost:3000/data/visitor?column=${firstData}&from=${fromDate}&to=${toDate}`)
-    // .then(response => response.json())
-    // .then(data => setFirstData(data))
-    // .catch(error => console.error('Error fetching data:', error));
-
-    // fetch(`http://localhost:3000/data/visitor?column=${secondData}&from=${fromDate}&to=${toDate}`)
-    // .then(response => response.json())
-    // .then(data => setSecondData(data))
-    // .catch(error => console.error('Error fetching data:', error));
-
-    setFirstData([
-      {date: '2020-01', value: 41.2},
-      {date: '2020-02', value: 34.6},
-      {date: '2020-03', value: 24.6},
-      {date: '2020-04', value: 39.6},
-      {date: '2020-05', value: 78.4},
-      {date: '2020-06', value: 27.6},
-      {date: '2020-07', value: 35},
-      {date: '2020-08', value: 31},
-      {date: '2020-09', value: 65.2},
-      {date: '2020-10', value: 124.4},
-      {date: '2020-11', value: 38.2},
-      {date: '2020-12', value: 18.4},
-    ]);
-
-    setSecondData([
-      {date: '2020-01', value: 60170},
-      {date: '2020-02', value: 70240},
-      {date: '2020-03', value: 70440},
-      {date: '2020-04', value: 57450},
-      {date: '2020-05', value: 44090},
-      {date: '2020-06', value: 44130},
-      {date: '2020-07', value: 60560},
-      {date: '2020-08', value: 54180},
-      {date: '2020-09', value: 47200},
-      {date: '2020-10', value: 69020},
-      {date: '2020-11', value: 78130},
-      {date: '2020-12', value: 89380},
-    ]);
-
-  }, [firstCol, secondCol, fromDate, toDate]);
 
   useEffect(() => {
     if (firstData.length === 0 || secondData.length === 0) return;
 
-    const data = firstData.map((d, i) => ({ date: d.date, first: d.value, second: secondData[i].value }));
+    const data = firstData.map((d, i) => ({ date: d["Date"], first: d[firstDataName], second: secondData[i][secondDataName] }));
 
     const width = 800;
     const height = 600;
-    const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+    const margin = { top: 20, right: 70, bottom: 40, left: 70 };
 
     // Define the SVG element
     const svg = d3.select(svgRef.current);
@@ -65,7 +20,7 @@ const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) =
 
     // Create the horizontal scale
     const x = d3.scaleLinear()
-    .domain(d3.extent(data, d => d.first))
+    .domain(d3.extent(data, d => d.second))
     .nice()
     .range([margin.left, width - margin.right]);
 
@@ -73,11 +28,34 @@ const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) =
 
     // Create the vertical scale
     const y = d3.scaleLinear()
-    .domain(d3.extent(data, d => d.second))
+    .domain(d3.extent(data, d => d.first))
     .nice()
     .range([height - margin.bottom, margin.top]);
 
     const yAxis = d3.axisLeft(y);
+
+    // Add background grid
+    svg.append('g')
+    .attr('class', 'x-grid')
+    .selectAll('line')
+    .data(x.ticks())
+    .join('line')
+    .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+    .attr('x1', d => x(d))
+    .attr('x2', d => x(d))
+    .attr('y1', margin.top)
+    .attr('y2', height - margin.bottom);
+
+    svg.append('g')
+    .attr('class', 'y-grid')
+    .selectAll('line')
+    .data(y.ticks())
+    .join('line')
+    .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+    .attr('x1', margin.left)
+    .attr('x2', width - margin.right)
+    .attr('y1', d => y(d))
+    .attr('y2', d => y(d));
 
     // Define the tooltip
     const tooltip = d3.select('body').append('div')
@@ -96,8 +74,8 @@ const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) =
     .join('circle')
     .attr('class', 'circle')
     .attr('clip-path', 'url(#clip)')
-    .attr('cx', d => x(d.first))
-    .attr('cy', d => y(d.second))
+    .attr('cy', d => y(d.first))
+    .attr('cx', d => x(d.second))
     .attr('r', 5)
     .attr('fill', 'steelblue');
 
@@ -110,17 +88,30 @@ const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) =
     .attr('width', width - margin.left - margin.right)
     .attr('height', height - margin.top - margin.bottom);
 
-    // Draw the horizontal axis
+    // Draw the horizontal axis and the labels
     svg.append('g')
     .attr('class', 'x-axis')
     .attr('transform', `translate(0,${height - margin.bottom})`)
     .call(xAxis);
 
-    // Draw the vertical axis
+    svg.append('text')
+    .attr('x', width / 2)
+    .attr('y', height - 5)
+    .attr('text-anchor', 'middle')
+    .text(secondDisplayName);
+
+    // Draw the vertical axis and the labels
     svg.append('g')
     .attr('class', 'y-axis')
     .attr('transform', `translate(${margin.left},0)`)
     .call(yAxis);
+
+    svg.append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -height / 2)
+    .attr('y', 15)
+    .attr('text-anchor', 'middle')
+    .text(firstDisplayName);
 
     // Add tooltip interactivity
     svg.selectAll('circle')
@@ -129,7 +120,7 @@ const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) =
       .duration(200)
       .style('opacity', 0.9);
 
-      tooltip.html(`Date: ${d.date}<br>${firstCol}: ${d.first}<br>${secondCol}: ${d.second}`)
+      tooltip.html(`<b>Date</b>: ${d.date}<br><b>${firstDisplayName}</b>: ${d.first}<br><b>${secondDisplayName}</b>: ${d.second}`)
       .style('left', `${event.pageX}px`)
       .style('top', `${event.pageY - 28}px`);
 
@@ -161,18 +152,37 @@ const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) =
       svg.selectAll('.x-axis').call(xAxis.scale(newX));
       svg.selectAll('.y-axis').call(yAxis.scale(newY));
 
+      // rescale the grid
+      svg.selectAll('.x-grid').selectAll('line')
+      .data(newX.ticks())
+      .join('line')
+      .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+      .attr('x1', d => newX(d))
+      .attr('x2', d => newX(d))
+      .attr('y1', margin.top)
+      .attr('y2', height - margin.bottom);
+
+      svg.selectAll('.y-grid').selectAll('line')
+      .data(newY.ticks())
+      .join('line')
+      .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+      .attr('x1', margin.left)
+      .attr('x2', width - margin.right)
+      .attr('y1', d => newY(d))
+      .attr('y2', d => newY(d));
+
       svg.selectAll('circle')
-      .attr('cx', d => newX(d.first))
-      .attr('cy', d => newY(d.second));
+      .attr('cy', d => newY(d.first))
+      .attr('cx', d => newX(d.second));
     });
 
     svg.call(zoom);
 
-  }, [firstData, secondData, firstCol, secondCol]);
+  });
 
   return (
     <svg ref={svgRef}></svg>
   );
 };
 
-export default WeatherVisitorScatterGraph;
+export default ScatterGraph;

@@ -33,8 +33,6 @@ def load_models():
     target_scaler = joblib.load("models/target_scaler.pkl")
     random_forest_model = joblib.load("models/random_forest_model.pkl")
 
-    print(random_forest_model)
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     load_models()
@@ -58,7 +56,7 @@ def read_root():
     return {"message": "Welcome to the Weather Prediction API"}
 
 # Prediction endpoint
-@app.post("/api/predict/rain_indicator/")
+@app.post("/api/predict/rain_indicator")
 def predict_weather_log(data: dict):
     # Ensure models are loaded
     if not logistic_model or not scaler:
@@ -88,7 +86,7 @@ def predict_weather_lin(data: dict):
     if not linear_model or not scaler:
         raise HTTPException(status_code=500, detail="Models or scalers not loaded.")
 
-#preparing data (normalizing)
+    #preparing data (normalizing)
     dataframe = pd.DataFrame(data, index=[0])
 
     lin_transform_data = dataframe.drop(
@@ -101,8 +99,9 @@ def predict_weather_lin(data: dict):
     dataframe = dataframe.reindex(columns=linear_model.feature_names_in_, fill_value=0)
 
     rain_mm_prediction = linear_model.predict(dataframe)[0]
-# Return the result
-    return {"rain_mm_prediction": max(0, rain_mm_prediction)}
+
+    # Return the result
+    return {"rain_prediction_mm": max(0, rain_mm_prediction)}
 
 
 @app.post("/api/predict/visitor")
@@ -124,11 +123,12 @@ def predict_visitor(data: dict):
 
 @app.get('/api/data/weather')
 def get_weather_data(
-        state: str = Query(..., description="State to filter data by (e.g., 'California')"),
-        weatherType: Optional[str] = Query(None, description="Type of weather data to filter (e.g., 'Rain_mm', 'Temp_Max')"),
-        fromDate: str = Query(..., description="Start date in YYYY-MM-DD format"),
-        toDate: str = Query(..., description="End date in YYYY-MM-DD format")
+    state: str = Query(..., description="State to filter data by (e.g., 'VIC')"),
+    weatherType: Optional[str] = Query(None, description="Type of weather data to filter (e.g., 'Rain_mm', 'Temp_Max')"),
+    fromDate: str = Query(..., description="Start date in YYYY-MM-DD format"),
+    toDate: str = Query(..., description="End date in YYYY-MM-DD format")
 ):
+
     # Load the data from CSV
     try:
         weather_data = pd.read_csv("weather.csv")
@@ -162,9 +162,10 @@ def get_weather_data(
     if weatherType:
         if weatherType not in filtered_data.columns:
             raise HTTPException(status_code=400, detail=f"'{weatherType}' is not a valid column in the data.")
-        filtered_data = filtered_data[['Date', 'State', weatherType]]
+        filtered_data = filtered_data[['Date', weatherType]]
+        filtered_data['Date'] = filtered_data['Date'].dt.strftime('%Y-%m-%d')
     else:
-        filtered_data = filtered_data.drop(columns=['Date'])
+        filtered_data = filtered_data.drop(columns=['State', 'Year', 'Month', 'Day', 'Tomorrow_Rain_mm', 'Tomorrow_Rain_Indicator'])
 
     # Convert the filtered data to a dictionary format for JSON response
     result = filtered_data.to_dict(orient="records")
@@ -174,7 +175,7 @@ def get_weather_data(
 @app.get('/api/data/visitors')
 def get_visitors_data(
     state: str = Query(..., description="State to filter data by (e.g., 'VIC')"),
-    columns: Optional[str] = Query(None, description="Type of weather data to filter (e.g., 'Monthly rainfall', 'Monthly mean maximum temperature')"),
+    columns: Optional[str] = Query(None, description="Type of data to filter (e.g., 'Monthly rainfall', 'Monthly mean maximum temperature')"),
     fromDate: str = Query(..., description="Start date in YYYY-MM format"),
     toDate: str = Query(..., description="End date in YYYY-MM format")
 ):
@@ -205,14 +206,15 @@ def get_visitors_data(
     if columns:
         if columns not in filtered_data.columns:
             raise HTTPException(status_code=400, detail=f"'{columns}' is not a valid column in the data.")
-        filtered_data = filtered_data[['Date', 'State', columns, 'Number of arriving visitors']]
+        filtered_data = filtered_data[['Date', columns]]
+        filtered_data['Date'] = filtered_data['Date'].dt.strftime('%Y-%m')
     else:
-        filtered_data = filtered_data[['Date', 'State', 'Number of arriving visitors'] + list(data.columns[3:])]
+        filtered_data = filtered_data.drop(columns=['State', 'Year', 'Month'])
 
     # Convert the filtered data to a dictionary format for JSON response
     result = filtered_data.to_dict(orient="records")
 
-    return {"visitor_data": result}
+    return result
 
 
 # Custom 404 handler for non-existent routes

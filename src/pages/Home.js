@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import ForecastCard from '../components/ForecastCard';
-import WeatherGraph from '../components/WeatherGraph';
-import { Box, Select, MenuItem, TextField, FormControl, InputLabel, Stack, Typography, Button, Alert } from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
 import ClearIcon from '@mui/icons-material/Clear';
-import Grid2 from '@mui/material/Grid';
+import SaveIcon from '@mui/icons-material/Save';
+import { Alert, Box, Button, FormControl, Grid2, InputLabel, MenuItem, Paper, Select, Stack, TextField, Typography } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
+import ForecastCard from '../components/ForecastCard';
+import BarGraph from '../components/BarGraph';
+import LineGraph from '../components/LineGraph';
 
 // Add field mappings for form labels
 const mapNameToLabel = {
@@ -30,18 +31,27 @@ const mapNameToLabel = {
   Dir_3pm: 'Wind Direction at 3pm',
   Spd_3pm: 'Wind Speed at 3pm (km/h)',
   MSLP_3pm: 'MSLP at 3pm',
-  Temp_Diff: 'Temperature Difference (°C)',
-  Rain_Indicator: 'Rain Indicator'
-};
+}
+
+const mapWeatherTypeToGraphType = (weatherType) => {
+  if (['Rain_mm', 'Evaporation_mm', 'Wind_Speed'].includes(weatherType)) {
+    return 'bar';
+  } else {
+    return 'line';
+  }
+}
 
 function Home() {
-  const [fromDate, setFromDate] = useState('2023-06-01');
-  const [toDate, setToDate] = useState('2023-06-15');
-  const [weatherType, setWeatherType] = useState('Rain_mm');
-  const [state] = useState('VIC'); // State is fixed; remove `setState` to avoid warnings
+  const [location, setLocation] = useOutletContext();
+  const [loading, setLoading] = useState(false);
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [weatherType, setWeatherType] = useState('');
+  const [formResult, setFormResults] = useState({severity: '', message: ''});
   const [forecastData, setForecastData] = useState([]); // Store forecast data from API
-  const [formResult, setFormResults] = useState({ severity: '', message: '' });
   const [missingFields, setMissingFields] = useState([]);
+  const [graphData, setGraphData] = useState([]);
+  const [forecastType, setForecastType] = useState('logistic');
   const [formData, setFormData] = useState({
     Day: '', Month: '', Year: '', State: '', Temp_Min: '', Temp_Max: '', Rain_mm: '', Evaporation_mm: '', Sun_hours: '',
     Wind_Direction: '', Wind_Speed: '', Time_since_midnight: '', Temp_9am: '', RH_9am: '', Cld_9am: '', Dir_9am: '',
@@ -100,7 +110,37 @@ function Home() {
       setFormResults({ severity: 'success', message: 'Weather data submitted successfully!' });
       // Send formData to your API here if needed
     } else {
-      setFormResults({ severity: 'error', message: 'Please fill in all required fields.' });
+      setMissingFields([]);
+      if (forecastType === 'linear') {
+        fetch('http://localhost:8000/api/predict/rain_mm', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          setFormResults({severity: 'success', message: `Forecasting result: ${Math.round(data.rain_prediction_mm * 1000) / 1000} mm of rain tomorrow`});
+        })
+        .catch(error => console.error('Error submitting form data:', error));
+      } else {
+        fetch('http://localhost:8000/api/predict/rain_indicator', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          setFormResults({severity: 'success', message: `Forecasting result: ${data.rain_prediction_indicator ? "There will be rain tomorrow" : "There will be no rain tomorrow"}`});
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          setFormResults({severity: 'error', message: 'An error occurred while submitting the form.'});
+        });
+      }
     }
   };
 
@@ -130,6 +170,20 @@ function Home() {
       setToDate(newToDate);
     }
   };
+
+  useEffect(() => {
+    setLoading(true);
+
+    if (fromDate && toDate && weatherType && location) {
+      fetch(`http://localhost:8000/api/data/weather?state=${location}&weatherType=${weatherType}&fromDate=${fromDate}&toDate=${toDate}`)
+      .then(response => response.json())
+      .then(data => {
+        setGraphData(data);
+        setLoading(false);
+      })
+      .catch(error => console.error('Error fetching data:', error));
+    }
+  }, [fromDate, toDate, weatherType, location]);
 
   return (
     <>
@@ -181,6 +235,22 @@ function Home() {
               </Grid2>
             ))}
             <Grid2 size={{ xs: 12, sm: 4 }}>
+              <FormControl variant="outlined" fullWidth size='small'>
+                <InputLabel>Forecasting Type</InputLabel>
+                <Select
+                name='forecastType'
+                value={forecastType}
+                onChange={(event) => setForecastType(event.target.value)}
+                label="Forecasting Type"
+                sx={{ textAlign: 'left' }}
+                >
+                  <MenuItem value="logistic">Logistic Regression (Rain/No rain)</MenuItem>
+                  <MenuItem value="linear">Linear Regression (Amount of rain)</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid2>
+
+            <Grid2 size={{ xs: 6, sm: 2 }}>
               <Button
                 variant="contained"
                 color="primary"
@@ -192,7 +262,8 @@ function Home() {
                 Submit
               </Button>
             </Grid2>
-            <Grid2 size={{ xs: 12, sm: 4 }}>
+
+            <Grid2 size={{ xs: 6, sm: 2 }}>
               <Button
                 variant="contained"
                 color="error"
@@ -206,7 +277,8 @@ function Home() {
             </Grid2>
           </Grid2>
         </form>
-        {formResult.message && <Alert severity={formResult.severity}>{formResult.message}</Alert>}
+
+        {formResult.message ? <Alert severity={formResult.severity}>{formResult.message}</Alert> : null}
       </Box>
 
       {/* Weather Data Chart */}
@@ -232,28 +304,44 @@ function Home() {
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField
-              label="From Date"
-              type="date"
-              value={fromDate}
-              onChange={handleFromDateChange}
-              fullWidth
-              InputLabelProps={{ shrink: true }}
+            label="From Date"
+            type="date"
+            value={fromDate}
+            onChange={handleFromDateChange}
+            slotProps={{
+              inputLabel: { shrink: true },
+              htmlInput: { min: '2023-08-01', max: '2024-09-23' }
+            }}
+            fullWidth
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField
-              label="To Date"
-              type="date"
-              value={toDate}
-              onChange={handleToDateChange}
-              fullWidth
-              InputLabelProps={{ shrink: true }}
+            label="To Date"
+            type="date"
+            value={toDate}
+            onChange={handleToDateChange}
+            slotProps={{
+              inputLabel: { shrink: true },
+              htmlInput: { min: fromDate, max: '2024-09-23' }
+            }}
+            fullWidth
             />
           </Grid2>
         </Grid2>
 
-        {/* Weather Graph */}
-        <WeatherGraph weatherType={weatherType} fromDate={fromDate} toDate={toDate} />
+        {/* Weather Chart */}
+        <Paper elevation={3} sx={{ mt: 2, mb: 2, p: 2 }}>
+          {!weatherType || !toDate || !fromDate ? (
+            <Alert severity="info">Please select a weather type, from date and to date to display the graph</Alert>
+          ) : (loading) ? (
+            <Alert severity="info">Loading...</Alert>
+          ) : (mapWeatherTypeToGraphType(weatherType) === 'line') ? (
+            <LineGraph data={graphData} dataName={weatherType} displayName={mapNameToLabel[weatherType]} />
+          ) : (
+            <BarGraph data={graphData} dataName={weatherType} displayName={mapNameToLabel[weatherType]} />
+          )}
+        </Paper>
       </Box>
     </>
   );

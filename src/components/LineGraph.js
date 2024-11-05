@@ -1,80 +1,99 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
-  const [data, setData] = useState([]);
+const LineGraph = ({ data, dataName, displayName }) => {
   const svgRef = useRef();
 
   const lineAnimationDuration = 500;
 
   useEffect(() => {
-    // fetch(`http://localhost:3000/data/weather/${dataType}?from=${fromDate}&to=${toDate}`)
-    //     .then(response => response.json())
-    //     .then(data => setData(data))
-    //     .catch(error => console.error('Error fetching data:', error));
-
-    setData([
-      { date: '2024-09-10', value: 0.2 },
-      { date: '2024-09-11', value: 0 },
-      { date: '2024-09-12', value: 8.2 },
-      { date: '2024-09-13', value: 0 },
-      { date: '2024-09-14', value: 3.4 },
-      { date: '2024-09-15', value: 2.2 },
-      { date: '2024-09-16', value: 0 },
-      { date: '2024-09-17', value: 1.4 },
-      { date: '2024-09-18', value: 0 },
-      { date: '2024-09-19', value: 0.4 },
-      { date: '2024-09-20', value: 1.4 },
-      { date: '2024-09-21', value: 6.4 },
-      { date: '2024-09-22', value: 0.2 },
-      { date: '2024-09-23', value: 0.2 },
-      { date: '2024-09-24', value: 0 },
-      { date: '2024-09-25', value: 1.2 }
-    ])
-  }, [dataType, fromDate, toDate]);
-
-  useEffect(() => {
     if (data.length === 0) return;
 
     const width = 800;
-    const height = 400;
-    const margin = { top: 20, right: 30, bottom: 20, left: 40 };
+    const height = 600;
+    const margin = { top: 20, right: 70, bottom: 40, left: 70 };
 
     // Define the SVG element
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
     svg.attr('viewBox', [0, 0, width, height]);
 
-    // Define the time parser and formatter
-    const timeParse = d3.timeParse('%Y-%m-%d');
+    let timeParse;
+    let xFrequency;
+
+    // Define the time parser and x-ticks frequency
+    if (data[0]["Date"].split('-').length === 3) {
+      timeParse = d3.timeParse('%Y-%m-%d');
+      xFrequency = d3.timeDay.every(1);
+    } else {
+      // Define the time parser and formatter
+      timeParse = d3.timeParse('%Y-%m');
+      xFrequency = d3.timeMonth.every(1);
+    }
 
     // Create the horizontal scale
     const x = d3.scaleTime()
-    .domain(d3.extent(data, d => timeParse(d.date)))
+    .domain(d3.extent(data, d => timeParse(d["Date"])))
     .range([margin.left, width - margin.right]);
 
-    const xAxis = d3.axisBottom(x).ticks(d3.timeDay.every(1));
+    const xAxis = d3.axisBottom(x).ticks(xFrequency);
 
     // Create the vertical scale
     const y = d3.scaleLinear()
-    .domain([0, d3.max(data, d => d.value)]).nice()
+    .domain([0, d3.max(data, d => d[dataName])]).nice()
     .range([height - margin.bottom, margin.top]);
 
     // Define the line
     const line = d3.line()
-    .x(d => x(timeParse(d.date)))
-    .y(d => y(d.value));
+    .x(d => x(timeParse(d["Date"])))
+    .y(d => y(d[dataName]));
 
-    // Draw the horizontal axis
+    // Draw the horizontal axis and the labels
     svg.append('g')
     .attr('class', 'x-axis')
     .attr('transform', `translate(0,${height - margin.bottom})`)
     .call(xAxis);
 
-    // Draw the vertical axis
+    svg.append('text')
+    .attr('x', width / 2)
+    .attr('y', height - 5)
+    .attr('text-anchor', 'middle')
+    .text('Date');
+
+    // Draw the vertical axis and the labels
     svg.append('g')
     .attr('transform', `translate(${margin.left},0)`)
     .call(d3.axisLeft(y));
+
+    svg.append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -height / 2)
+    .attr('y', 15)
+    .attr('text-anchor', 'middle')
+    .text(displayName);
+
+    // Add background grid
+    svg.append('g')
+    .attr('class', 'x-grid')
+    .selectAll('line')
+    .data(x.ticks())
+    .join('line')
+    .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+    .attr('x1', d => x(d))
+    .attr('x2', d => x(d))
+    .attr('y1', margin.top)
+    .attr('y2', height - margin.bottom);
+
+    svg.append('g')
+    .attr('class', 'y-grid')
+    .selectAll('line')
+    .data(y.ticks())
+    .join('line')
+    .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+    .attr('x1', margin.left)
+    .attr('x2', width - margin.right)
+    .attr('y1', d => y(d))
+    .attr('y2', d => y(d));
 
     // Draw the line
     const path = svg.append('path')
@@ -106,14 +125,22 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
     .attr('width', width - margin.left - margin.right)
     .attr('height', height);
 
+    // add slightly bigger clippath for the dots
+    svg.append('clipPath')
+    .attr('id', 'clip-dots')
+    .append('rect')
+    .attr('x', margin.left - 5)
+    .attr('width', width - margin.left - margin.right + 10)
+    .attr('height', height + 10);
+
     // Create the dots
     svg.selectAll('.dot')
     .data(data)
     .enter().append('circle')
     .attr('class', 'dot')
-    .attr('clip-path', 'url(#clip)')
-    .attr('cx', d => x(timeParse(d.date)))
-    .attr('cy', d => y(d.value))
+    .attr('clip-path', 'url(#clip-dots)')
+    .attr('cx', d => x(timeParse(d["Date"])))
+    .attr('cy', d => y(d[dataName]))
     .attr('r', 5)
     .attr('fill', 'steelblue')
     .style('opacity', 0);
@@ -141,7 +168,7 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
       .duration(200)
       .style('opacity', 1);
 
-      tooltip.html(`Date: ${timeParse(d.date).toLocaleDateString()}<br>Value: ${d.value}`)
+      tooltip.html(`<b>Date</b>: ${timeParse(d["Date"]).toLocaleDateString()}<br><b>${displayName}</b>: ${d[dataName]}`)
       .style('left', `${event.pageX + 5}px`)
       .style('top', `${event.pageY - 28}px`);
 
@@ -163,7 +190,7 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
 
     // Define the zoom behavior
     const zoom = d3.zoom()
-    .scaleExtent([1, 2])
+    .scaleExtent([1, data.length / 16])
     .translateExtent([[margin.left, margin.top], [width - margin.right, height - margin.top]])
     .extent([[margin.left, margin.top], [width - margin.right, height - margin.top]])
     .on('zoom', (event) => {
@@ -171,18 +198,28 @@ const WeatherLineGraph = ({ dataType, fromDate, toDate }) => {
 
       svg.select('.x-axis').call(xAxis.scale(newX));
 
-      path.attr('d', line.x(d => newX(timeParse(d.date))));
+      // rescale the grid
+      svg.selectAll('.x-grid').selectAll('line')
+      .data(newX.ticks())
+      .join('line')
+      .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+      .attr('x1', d => newX(d))
+      .attr('x2', d => newX(d))
+      .attr('y1', margin.top)
+      .attr('y2', height - margin.bottom);
 
-      svg.selectAll('.dot').attr('cx', d => newX(timeParse(d.date)));
+      path.attr('d', line.x(d => newX(timeParse(d["Date"]))));
+
+      svg.selectAll('.dot').attr('cx', d => newX(timeParse(d["Date"])));
     });
 
     svg.call(zoom);
 
-  }, [data]);
+  });
 
   return (
     <svg ref={svgRef}></svg>
   );
 };
 
-export default WeatherLineGraph;
+export default LineGraph;

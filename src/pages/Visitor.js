@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import WeatherVisitorScatterGraph from '../components/WeatherVisitorScatterGraph';
+import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
+import ScatterGraph from '../components/ScatterGraph';
+import LineGraph from '../components/LineGraph';
 import { Box, Select, MenuItem, TextField, FormControl, InputLabel, Grid2, Typography, Button, Alert, Paper } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -11,13 +13,19 @@ const mapNameToLabel = {
   "Monthly mean daily global solar exposure": 'Monthly mean daily global solar exposure (MJ/m^2/day)',
   "Monthly mean minimum temperature": 'Monthly mean minimum temperature (°C)',
   "Monthly mean maximum temperature": 'Monthly mean maximum temperature (°C)',
+  "Number of arriving visitors": 'Monthly number of arriving visitors',
 }
 
 function Home() {
+  const [location, setLocation] = useOutletContext();
+  const [isLoadingFirst, setIsLoadingFirst] = useState(false);
+  const [isLoadingSecond, setIsLoadingSecond] = useState(false);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [firstCol, setfirstCol] = useState('');
   const [secondCol, setsecondCol] = useState('');
+  const [firstData, setFirstData] = useState([]);
+  const [secondData, setSecondData] = useState([]);
   const [formResult, setFormResults] = useState({severity: '', message: ''});
   const [missingFields, setMissingFields] = useState([]);
   const [formData, setFormData] = useState({
@@ -73,8 +81,22 @@ function Home() {
       setFormResults({severity: 'error', message: 'Please fill in the required fields.'});
       setMissingFields(_missingFields);
     } else {
-      setFormResults({severity: 'success', message: 'Weather data submitted successfully!'});
       setMissingFields([]);
+      fetch('http://localhost:8000/api/predict/visitor', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+      .then(response => response.json())
+      .then(data => {
+        setFormResults({severity: 'success', message: `Predicted number of visitors: ${data['Number of arriving visitors']} visitors.`});
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        setFormResults({severity: 'error', message: 'An error occurred while submitting the form.'});
+      });
     }
   }
 
@@ -110,11 +132,44 @@ function Home() {
     }
   };
 
+  useEffect(() => {
+    setFirstData([]);
+
+    if (location && firstCol && fromDate && toDate) {
+      setIsLoadingFirst(true);
+      fetch(`http://localhost:8000/api/data/visitors?state=${location}&columns=${firstCol}&fromDate=${fromDate}&toDate=${toDate}`)
+      .then(response => response.json())
+      .then(data => {
+        setFirstData(data)
+        setIsLoadingFirst(false);
+      })
+      .catch(error => console.error('Error fetching data:', error));
+    }
+  }, [location, firstCol, fromDate, toDate]);
+
+  useEffect(() => {
+    setSecondData([]);
+
+    if (location && secondCol && fromDate && toDate) {
+      setIsLoadingSecond(true);
+
+      if (secondCol === 'Date') {setIsLoadingSecond(false); return;}
+
+      fetch(`http://localhost:8000/api/data/visitors?state=${location}&columns=${secondCol}&fromDate=${fromDate}&toDate=${toDate}`)
+      .then(response => response.json())
+      .then(data => {
+        setSecondData(data);
+        setIsLoadingSecond(false);
+      })
+      .catch(error => console.error('Error fetching data:', error));
+    }
+  }, [location, secondCol, fromDate, toDate]);
+
   return (
     <>
       {/* Responsive Form for Weather Data Inputs */}
       <Box sx={{ flexGrow: 1, mb: 5 }}>
-        <Typography variant="h5" align="left" gutterBottom>Manual Montly Weather Data Inputs</Typography>
+        <Typography variant="h5" align="left" gutterBottom>Manual Data Inputs</Typography>
 
         <form noValidate onSubmit={handleFormSubmit} onReset={handleFormReset}>
           <Grid2 container spacing={2} alignItems="center" justifyContent="center" sx={{ mb: 2 }}>
@@ -127,12 +182,12 @@ function Home() {
                       required
                       error={missingFields.includes('Date')}
                       label={label}
-                      type="date"
+                      type="month"
                       fullWidth
                       name={name}
                       value={
-                        (formData.Year && formData.Month && formData.Day) ?
-                        `${formData.Year}-${formData.Month}-${formData.Day}` :
+                        (formData.Year && formData.Month) ?
+                        `${formData.Year}-${formData.Month}` :
                         ''
                       }
                       onChange={handleFormDataChange}
@@ -172,7 +227,7 @@ function Home() {
                       </FormControl>
                     </Grid2>
                   )
-                } else {
+                } else if (name !== "Number of arriving visitors") {
                   return (
                     <Grid2 size={{ xs: 12, sm: 4 }} key={name}>
                       <TextField
@@ -188,6 +243,8 @@ function Home() {
                       />
                     </Grid2>
                   )
+                } else {
+                  return null;
                 }
               })
             }
@@ -241,7 +298,7 @@ function Home() {
                 <MenuItem value="Monthly mean daily global solar exposure">Monthly mean daily global solar exposure (MJ/m^2/day)</MenuItem>
                 <MenuItem value="Monthly mean minimum temperature">Monthly mean minimum temperature (°C)</MenuItem>
                 <MenuItem value="Monthly mean maximum temperature">Monthly mean maximum temperature (°C)</MenuItem>
-                <MenuItem value="Monthly number of arriving visitors">Monthly number of arriving visitors</MenuItem>
+                <MenuItem value="Number of arriving visitors">Monthly number of arriving visitors</MenuItem>
               </Select>
             </FormControl>
           </Grid2>
@@ -255,24 +312,25 @@ function Home() {
               label="Second Data Type"
               sx={{ textAlign: 'left' }}
               >
+                <MenuItem value="Date">Date</MenuItem>
                 <MenuItem value="Monthly rainfall">Monthly rainfall (mm)</MenuItem>
                 <MenuItem value="Monthly mean daily global solar exposure">Monthly mean daily global solar exposure (MJ/m^2/day)</MenuItem>
                 <MenuItem value="Monthly mean minimum temperature">Monthly mean minimum temperature (°C)</MenuItem>
                 <MenuItem value="Monthly mean maximum temperature">Monthly mean maximum temperature (°C)</MenuItem>
-                <MenuItem value="Monthly number of arriving visitors">Monthly number of arriving visitors</MenuItem>
+                <MenuItem value="Number of arriving visitors">Monthly number of arriving visitors</MenuItem>
               </Select>
             </FormControl>
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 3}} >
             <TextField
-            label="From Date"
-            type="date"
+            label="From Month"
+            type="month"
             value={fromDate}
             onChange={handleFromDateChange}
             slotProps={{
               inputLabel: { shrink: true },
-              htmlInput: { max: new Date().toISOString().split('T')[0] }
+              htmlInput: { min: '2000-01', max: '2019-12' }
             }}
             fullWidth
             />
@@ -280,13 +338,13 @@ function Home() {
 
           <Grid2 size={{ xs: 12, sm: 3}} >
             <TextField
-            label="To Date"
-            type="date"
+            label="To Month"
+            type="month"
             value={toDate}
             onChange={handleToDateChange}
             slotProps={{
               inputLabel: { shrink: true },
-              htmlInput: { min: fromDate, max: new Date().toISOString().split('T')[0]}
+              htmlInput: { min: fromDate, max: '2019-12' }
             }}
             fullWidth
             />
@@ -295,10 +353,21 @@ function Home() {
 
         {/* Weather Chart */}
         <Paper elevation={3} sx={{ mt: 2, mb: 2, p: 2 }}>
-          {(firstCol && secondCol && fromDate && toDate) ? (
-            <WeatherVisitorScatterGraph firstCol={firstCol} secondCol={secondCol} fromDate={fromDate} toDate={toDate} />
-          ) : (
+          {(!firstCol || !secondCol || !fromDate || !toDate) ? (
             <Alert severity="info">Please select the weather types and dates to display the chart.</Alert>
+          ) : (isLoadingFirst || isLoadingSecond) ? (
+            <Alert severity="info">Loading...</Alert>
+          ) : (secondCol === "Date") ? (
+            <LineGraph data={firstData} dataName={firstCol} displayName={mapNameToLabel[firstCol]}/>
+          ) : (
+            <ScatterGraph
+            firstData={firstData}
+            firstDataName={firstCol}
+            firstDisplayName={mapNameToLabel[firstCol]}
+            secondData={secondData}
+            secondDataName={secondCol}
+            secondDisplayName={mapNameToLabel[secondCol]}
+            />
           )}
         </Paper>
       </Box>
