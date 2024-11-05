@@ -166,6 +166,7 @@ def get_weather_data(
         filtered_data['Date'] = filtered_data['Date'].dt.strftime('%Y-%m-%d')
     else:
         filtered_data = filtered_data.drop(columns=['State', 'Year', 'Month', 'Day', 'Tomorrow_Rain_mm', 'Tomorrow_Rain_Indicator'])
+        filtered_data['Date'] = filtered_data['Date'].dt.strftime('%Y-%m-%d')
 
     # Convert the filtered data to a dictionary format for JSON response
     result = filtered_data.to_dict(orient="records")
@@ -210,6 +211,7 @@ def get_visitors_data(
         filtered_data['Date'] = filtered_data['Date'].dt.strftime('%Y-%m')
     else:
         filtered_data = filtered_data.drop(columns=['State', 'Year', 'Month'])
+        filtered_data['Date'] = filtered_data['Date'].dt.strftime('%Y-%m-%d')
 
     # Convert the filtered data to a dictionary format for JSON response
     result = filtered_data.to_dict(orient="records")
