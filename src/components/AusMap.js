@@ -15,6 +15,17 @@ const mapIdToState = {
   7: 'ACT',
 };
 
+const mapStateToName = {
+  'NSW': 'New South Wales',
+  'VIC': 'Victoria',
+  'QLD': 'Queensland',
+  'SA': 'South Australia',
+  'WA': 'Western Australia',
+  'TAS': 'Tasmania',
+  'NT': 'Northern Territory',
+  'ACT': 'Australian Capital Territory',
+};
+
 const AusMap = ({ data, dataName, displayName, colorInterpolate, domain }) => {
   const svgRef = useRef();
 
@@ -63,7 +74,7 @@ const AusMap = ({ data, dataName, displayName, colorInterpolate, domain }) => {
     .on('mouseover', (event, d) => {
       const stateTemp = data.find(temp => temp['State'] === mapIdToState[d.id]);
 
-      tooltip.html(`${mapIdToState[d.id]}: ${stateTemp ? stateTemp[dataName] : 'No data'}`)
+      tooltip.html(`<b>State</b>: ${mapStateToName[mapIdToState[d.id]]}<br /> <b>${displayName}</b>: ${stateTemp ? stateTemp[dataName] : 'No data'}`)
       .transition()
       .duration(200)
       .style('opacity', 1);

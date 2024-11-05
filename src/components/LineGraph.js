@@ -168,7 +168,7 @@ const LineGraph = ({ data, dataName, displayName }) => {
       .duration(200)
       .style('opacity', 1);
 
-      tooltip.html(`Date: ${timeParse(d["Date"]).toLocaleDateString()}<br>Value: ${d[dataName]}`)
+      tooltip.html(`<b>Date</b>: ${timeParse(d["Date"]).toLocaleDateString()}<br><b>${displayName}</b>: ${d[dataName]}`)
       .style('left', `${event.pageX + 5}px`)
       .style('top', `${event.pageY - 28}px`);
 

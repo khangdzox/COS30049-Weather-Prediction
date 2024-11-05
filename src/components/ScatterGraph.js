@@ -120,7 +120,7 @@ const ScatterGraph = ({ firstData, firstDataName, firstDisplayName, secondData, 
       .duration(200)
       .style('opacity', 0.9);
 
-      tooltip.html(`Date: ${d.date}<br>${firstDisplayName}: ${d.first}<br>${secondDisplayName}: ${d.second}`)
+      tooltip.html(`<b>Date</b>: ${d.date}<br><b>${firstDisplayName}</b>: ${d.first}<br><b>${secondDisplayName}</b>: ${d.second}`)
       .style('left', `${event.pageX}px`)
       .style('top', `${event.pageY - 28}px`);
 

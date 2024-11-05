@@ -118,7 +118,7 @@ const BarGraph = ({ data, dataName, displayName }) => {
       .duration(200)
       .style('opacity', 1);
 
-      tooltip.html(`Date: ${d["Date"]}<br>Value: ${d[dataName]}`)
+      tooltip.html(`<b>Date</b>: ${d["Date"]}<br><b>${displayName}</b>: ${d[dataName]}`)
       .style('left', `${event.pageX + 5}px`)
       .style('top', `${event.pageY - 28}px`);
 
