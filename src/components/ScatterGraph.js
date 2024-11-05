@@ -1,58 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) => {
-  const [firstData, setFirstData] = useState([]);
-  const [secondData, setSecondData] = useState([]);
+const ScatterGraph = ({ firstData, firstDataName, firstDisplayName, secondData, secondDataName, secondDisplayName }) => {
   const svgRef = useRef();
-
-  useEffect(() => {
-    // fetch(`http://localhost:3000/data/visitor?column=${firstData}&from=${fromDate}&to=${toDate}`)
-    // .then(response => response.json())
-    // .then(data => setFirstData(data))
-    // .catch(error => console.error('Error fetching data:', error));
-
-    // fetch(`http://localhost:3000/data/visitor?column=${secondData}&from=${fromDate}&to=${toDate}`)
-    // .then(response => response.json())
-    // .then(data => setSecondData(data))
-    // .catch(error => console.error('Error fetching data:', error));
-
-    setFirstData([
-      {date: '2020-01', value: 41.2},
-      {date: '2020-02', value: 34.6},
-      {date: '2020-03', value: 24.6},
-      {date: '2020-04', value: 39.6},
-      {date: '2020-05', value: 78.4},
-      {date: '2020-06', value: 27.6},
-      {date: '2020-07', value: 35},
-      {date: '2020-08', value: 31},
-      {date: '2020-09', value: 65.2},
-      {date: '2020-10', value: 124.4},
-      {date: '2020-11', value: 38.2},
-      {date: '2020-12', value: 18.4},
-    ]);
-
-    setSecondData([
-      {date: '2020-01', value: 60170},
-      {date: '2020-02', value: 70240},
-      {date: '2020-03', value: 70440},
-      {date: '2020-04', value: 57450},
-      {date: '2020-05', value: 44090},
-      {date: '2020-06', value: 44130},
-      {date: '2020-07', value: 60560},
-      {date: '2020-08', value: 54180},
-      {date: '2020-09', value: 47200},
-      {date: '2020-10', value: 69020},
-      {date: '2020-11', value: 78130},
-      {date: '2020-12', value: 89380},
-    ]);
-
-  }, [firstCol, secondCol, fromDate, toDate]);
 
   useEffect(() => {
     if (firstData.length === 0 || secondData.length === 0) return;
 
-    const data = firstData.map((d, i) => ({ date: d.date, first: d.value, second: secondData[i].value }));
+    const data = firstData.map((d, i) => ({ date: d["Date"], first: d[firstDataName], second: secondData[i][secondDataName] }));
 
     const width = 800;
     const height = 600;
@@ -120,7 +75,7 @@ const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) =
     .attr('x', width / 2)
     .attr('y', height - 5)
     .attr('text-anchor', 'middle')
-    .text(secondCol);
+    .text(secondDisplayName);
 
     // Draw the vertical axis and the labels
     svg.append('g')
@@ -133,7 +88,7 @@ const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) =
     .attr('x', -height / 2)
     .attr('y', 15)
     .attr('text-anchor', 'middle')
-    .text(firstCol);
+    .text(firstDisplayName);
 
     // Add tooltip interactivity
     svg.selectAll('circle')
@@ -142,7 +97,7 @@ const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) =
       .duration(200)
       .style('opacity', 0.9);
 
-      tooltip.html(`Date: ${d.date}<br>${firstCol}: ${d.first}<br>${secondCol}: ${d.second}`)
+      tooltip.html(`Date: ${d.date}<br>${firstDisplayName}: ${d.first}<br>${secondDisplayName}: ${d.second}`)
       .style('left', `${event.pageX}px`)
       .style('top', `${event.pageY - 28}px`);
 
@@ -181,11 +136,11 @@ const WeatherVisitorScatterGraph = ({ firstCol, secondCol, fromDate, toDate }) =
 
     svg.call(zoom);
 
-  }, [firstData, secondData, firstCol, secondCol]);
+  });
 
   return (
     <svg ref={svgRef}></svg>
   );
 };
 
-export default WeatherVisitorScatterGraph;
+export default ScatterGraph;
