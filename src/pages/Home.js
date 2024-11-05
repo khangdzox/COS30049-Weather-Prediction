@@ -45,6 +45,8 @@ function Home() {
   const [location, setLocation] = useOutletContext();
   const [today, setToday] = useState('2024-09-22');
   const [loading, setLoading] = useState(false);
+  const [loadDate, setLoadDate] = useState('');
+  const [loadState, setLoadState] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [weatherType, setWeatherType] = useState('');
@@ -97,6 +99,34 @@ function Home() {
       .catch(error => console.error('Error fetching forecast prediction:', error));
     }
   }, [forecastCardData, location, today]);
+
+  const handleLoadPreviousData = () => {
+    if (loadDate === '') {
+      setFormResults({severity: 'error', message: 'Please select a date to load the data'});
+      return;
+    }
+
+    if (loadState === '') {
+      setFormResults({severity: 'error', message: 'Please select a state to load the data'});
+      return;
+    }
+
+    fetch(`http://localhost:8000/api/data/weather?state=${loadState}&fromDate=${loadDate}&toDate=${loadDate}`)
+    .then(response => response.json())
+    .then(data => {
+      data[0].Day = loadDate.split('-')[2];
+      data[0].Month = loadDate.split('-')[1];
+      data[0].Year = loadDate.split('-')[0];
+      data[0].State = loadState;
+      delete data[0].Date;
+      setFormData(data[0]);
+      setFormResults({severity: 'success', message: 'Data loaded successfully'});
+    })
+    .catch(error => {
+      console.error('Error fetching previous data:', error);
+      setFormResults({severity: 'error', message: 'An error occurred while loading the data'});
+    });
+  }
 
   const handleFormDataChange = (event) => {
     const { name, value } = event.target;
@@ -273,7 +303,7 @@ function Home() {
         {forecastCardData.map((item, index) => (
           <ForecastCard
             key={index}
-            date={item.Date ? item.Date.split('T')[0] : item.Date}
+            date={item.Date}
             rain={item.Rain_mm}
             isToday={index === forecastCardData.length - 1}
             display={{
@@ -302,6 +332,65 @@ function Home() {
       {/* Responsive Form for Weather Data Inputs */}
       <Box sx={{ flexGrow: 1, mb: 5 }}>
         <Typography variant="h5" align="left" gutterBottom>Manual Weather Data Inputs</Typography>
+
+        <Grid2 container spacing={2} alignItems="center" justifyContent="center" sx={{ mb: 2 }} >
+          <Grid2 size={{ xs: 12, sm: 2 }}>
+            <Typography variant="body1" align="left">Load previous data</Typography>
+          </Grid2>
+
+          <Grid2 size={{ xs: 12, sm: 3 }}>
+            <TextField
+            label="Select Date"
+            type="date"
+            size='small'
+            fullWidth
+            value={loadDate}
+            onChange={(e) => setLoadDate(e.target.value)}
+            slotProps={{
+              inputLabel: { shrink: true },
+              htmlInput: { min: '2023-08-01', max: '2024-09-23' }
+            }}
+            />
+          </Grid2>
+
+          <Grid2 size={{ xs: 12, sm: 3 }}>
+            <FormControl
+            variant="outlined"
+            size='small'
+            fullWidth
+            >
+              <InputLabel>Select State</InputLabel>
+              <Select
+              value={loadState}
+              onChange={(e) => setLoadState(e.target.value)}
+              label="Select State"
+              sx={{ textAlign: 'left' }}
+              >
+                <MenuItem value="VIC">Victoria</MenuItem>
+                <MenuItem value="NSW">New South Wales</MenuItem>
+                <MenuItem value="QLD">Queensland</MenuItem>
+                <MenuItem value="SA">South Australia</MenuItem>
+                <MenuItem value="WA">Western Australia</MenuItem>
+                <MenuItem value="TAS">Tasmania</MenuItem>
+                <MenuItem value="NT">Northern Territory</MenuItem>
+                <MenuItem value="ACT">Australian Capital Territory</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid2>
+
+          <Grid2 size={{ xs: 12, sm: 2 }}>
+            <Button
+            variant="contained"
+            color="primary"
+            fullWidth
+            onClick={() => {
+              handleLoadPreviousData();
+            }}
+            >
+              Load Data
+            </Button>
+          </Grid2>
+        </Grid2>
 
         <form noValidate onSubmit={handleFormSubmit} onReset={handleFormReset}>
           <Grid2 container spacing={2} alignItems="center" justifyContent="center" sx={{ mb: 2 }}>
