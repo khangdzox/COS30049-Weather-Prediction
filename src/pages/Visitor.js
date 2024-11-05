@@ -169,7 +169,7 @@ function Home() {
     <>
       {/* Responsive Form for Weather Data Inputs */}
       <Box sx={{ flexGrow: 1, mb: 5 }}>
-        <Typography variant="h5" align="left" gutterBottom>Manual Montly Weather Data Inputs</Typography>
+        <Typography variant="h5" align="left" gutterBottom>Manual Data Inputs</Typography>
 
         <form noValidate onSubmit={handleFormSubmit} onReset={handleFormReset}>
           <Grid2 container spacing={2} alignItems="center" justifyContent="center" sx={{ mb: 2 }}>

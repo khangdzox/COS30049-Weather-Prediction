@@ -19,8 +19,8 @@ import CloudRoundedIcon from '@mui/icons-material/CloudRounded';
 const mapLinkToLabel = {
   '/': 'Home',
   '/visitor': 'Visitor',
-  '/about': 'About us',
   '/map': 'Map',
+  '/about': 'About us',
   '/faq': 'FAQ',
 }
 
