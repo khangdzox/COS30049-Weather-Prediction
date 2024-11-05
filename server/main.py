@@ -214,7 +214,7 @@ def get_visitors_data(
     # Convert the filtered data to a dictionary format for JSON response
     result = filtered_data.to_dict(orient="records")
 
-    return {"visitor_data": result}
+    return result
 
 
 # Custom 404 handler for non-existent routes
