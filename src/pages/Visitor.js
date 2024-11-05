@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import ScatterGraph from '../components/ScatterGraph';
 import LineGraph from '../components/LineGraph';
 import { Box, Select, MenuItem, TextField, FormControl, InputLabel, Grid2, Typography, Button, Alert, Paper } from '@mui/material';
@@ -16,6 +17,7 @@ const mapNameToLabel = {
 }
 
 function Home() {
+  const [location, setLocation] = useOutletContext();
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [firstCol, setfirstCol] = useState('');

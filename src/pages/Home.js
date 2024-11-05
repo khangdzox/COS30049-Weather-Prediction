@@ -2,6 +2,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import SaveIcon from '@mui/icons-material/Save';
 import { Alert, Box, Button, FormControl, Grid2, InputLabel, MenuItem, Paper, Select, Stack, TextField, Typography } from '@mui/material';
 import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import ForecastCard from '../components/ForecastCard';
 import BarGraph from '../components/BarGraph';
 import LineGraph from '../components/LineGraph';
@@ -40,6 +41,7 @@ const mapWeatherTypeToGraphType = (weatherType) => {
 }
 
 function Home() {
+  const [location, setLocation] = useOutletContext();
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [weatherType, setWeatherType] = useState('');

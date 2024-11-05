@@ -24,11 +24,10 @@ const mapLinkToLabel = {
   '/faq': 'FAQ',
 }
 
-const NavBar = () => {
+const NavBar = ({ location, setLocation }) => {
   // const [fromDate, setFromDate] = useState('');
   // const [toDate, setToDate] = useState('');
   const [anchorElNav, setAnchorElNav] = useState(null);
-  const [location, setLocation] = useState('Melbourne');
 
   const handleLocationChange = (event) => {
     setLocation(event.target.value);
