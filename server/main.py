@@ -101,7 +101,7 @@ def predict_weather_lin(data: dict):
     rain_mm_prediction = linear_model.predict(dataframe)[0]
 
     # Return the result
-    return {"rain_mm_prediction": max(0, rain_mm_prediction)}
+    return {"rain_prediction_mm": max(0, rain_mm_prediction)}
 
 
 @app.post("/api/predict/visitor")
