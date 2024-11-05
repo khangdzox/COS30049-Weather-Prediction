@@ -167,7 +167,7 @@ const LineGraph = ({ data, dataName, displayName }) => {
 
     // Define the zoom behavior
     const zoom = d3.zoom()
-    .scaleExtent([1, 2])
+    .scaleExtent([1, data.length / 16])
     .translateExtent([[margin.left, margin.top], [width - margin.right, height - margin.top]])
     .extent([[margin.left, margin.top], [width - margin.right, height - margin.top]])
     .on('zoom', (event) => {

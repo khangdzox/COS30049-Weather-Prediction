@@ -226,30 +226,13 @@ function Home() {
   };
 
   useEffect(() => {
-  // fetch(`http://localhost:3000/data/weather/${dataType}?from=${fromDate}&to=${toDate}`)
-  // .then(response => response.json())
-  // .then(data => setData(data))
-  // .catch(error => console.error('Error fetching data:', error));
-
-    setGraphData([
-      { "Date": '2024-09-10', [weatherType]: 0.2 },
-      { "Date": '2024-09-11', [weatherType]: 0 },
-      { "Date": '2024-09-12', [weatherType]: 8.2 },
-      { "Date": '2024-09-13', [weatherType]: 0 },
-      { "Date": '2024-09-14', [weatherType]: 3.4 },
-      { "Date": '2024-09-15', [weatherType]: 2.2 },
-      { "Date": '2024-09-16', [weatherType]: 0 },
-      { "Date": '2024-09-17', [weatherType]: 1.4 },
-      { "Date": '2024-09-18', [weatherType]: 0 },
-      { "Date": '2024-09-19', [weatherType]: 0.4 },
-      { "Date": '2024-09-20', [weatherType]: 1.4 },
-      { "Date": '2024-09-21', [weatherType]: 6.4 },
-      { "Date": '2024-09-22', [weatherType]: 0.2 },
-      { "Date": '2024-09-23', [weatherType]: 0.2 },
-      { "Date": '2024-09-24', [weatherType]: 0 },
-      { "Date": '2024-09-25', [weatherType]: 1.2 }
-    ])
-  }, [fromDate, toDate, weatherType]);
+    if (fromDate && toDate && weatherType && location) {
+      fetch(`http://localhost:8000/api/data/weather?state=${location}&weatherType=${weatherType}&fromDate=${fromDate}&toDate=${toDate}`)
+      .then(response => response.json())
+      .then(data => setGraphData(data))
+      .catch(error => console.error('Error fetching data:', error));
+    }
+  }, [fromDate, toDate, weatherType, location]);
 
   return (
     <>
@@ -442,7 +425,7 @@ function Home() {
             onChange={handleFromDateChange}
             slotProps={{
               inputLabel: { shrink: true },
-              htmlInput: { max: new Date().toISOString().split('T')[0] }
+              htmlInput: { min: '2023-08-01', max: '2024-09-23' }
             }}
             fullWidth
             />
@@ -456,7 +439,7 @@ function Home() {
             onChange={handleToDateChange}
             slotProps={{
               inputLabel: { shrink: true },
-              htmlInput: { min: fromDate, max: new Date().toISOString().split('T')[0]}
+              htmlInput: { min: fromDate, max: '2024-09-23' }
             }}
             fullWidth
             />

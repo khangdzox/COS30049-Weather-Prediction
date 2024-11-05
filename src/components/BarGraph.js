@@ -131,7 +131,7 @@ const BarGraph = ({ data, dataName, displayName }) => {
       const extent = [[margin.left, margin.top], [width - margin.right, height - margin.top]];
 
       const zoom = d3.zoom()
-      .scaleExtent([1, 2])
+      .scaleExtent([1, data.length / 16])
       .translateExtent(extent)
       .extent(extent)
       .on('zoom', (event) => {
