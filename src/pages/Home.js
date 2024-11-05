@@ -325,7 +325,7 @@ function Home() {
           &#8594;
         </Box>
         <ForecastCard date={
-          new Date(new Date().setDate(new Date(today).getDate() + 1)).toISOString().split('T')[0]
+          new Date(new Date(today).setDate(new Date(today).getDate() + 1)).toISOString().split('T')[0]
         } rain={forecastCardPrediction} isTomorrow display='block' />
       </Stack>
 
