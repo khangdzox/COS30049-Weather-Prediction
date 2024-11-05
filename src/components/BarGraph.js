@@ -39,17 +39,6 @@ const BarGraph = ({ data, dataName, displayName }) => {
 
     // Add background grid
     svg.append('g')
-    .attr('class', 'x-grid')
-    .selectAll('line')
-    .data(x.ticks())
-    .join('line')
-    .attr('stroke', 'rgba(0, 0, 0, 0.1)')
-    .attr('x1', d => x(d))
-    .attr('x2', d => x(d))
-    .attr('y1', margin.top)
-    .attr('y2', height - margin.bottom);
-
-    svg.append('g')
     .attr('class', 'y-grid')
     .selectAll('line')
     .data(y.ticks())
@@ -161,16 +150,6 @@ const BarGraph = ({ data, dataName, displayName }) => {
         x.range([margin.left, width - margin.right].map(d => event.transform.applyX(d)));
         svg.selectAll('.bar').attr('x', d => x(d["Date"])).attr('width', x.bandwidth());
         svg.selectAll('.x-axis').call(xAxis);
-
-        // rescale the grid
-        svg.selectAll('.x-grid').selectAll('line')
-        .data(x.ticks())
-        .join('line')
-        .attr('stroke', 'rgba(0, 0, 0, 0.1)')
-        .attr('x1', d => x(d))
-        .attr('x2', d => x(d))
-        .attr('y1', margin.top)
-        .attr('y2', height - margin.bottom);
       });
 
       svg.call(zoom);
