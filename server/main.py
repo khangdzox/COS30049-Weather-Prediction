@@ -33,8 +33,6 @@ def load_models():
     target_scaler = joblib.load("models/target_scaler.pkl")
     random_forest_model = joblib.load("models/random_forest_model.pkl")
 
-    print(random_forest_model)
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     load_models()
