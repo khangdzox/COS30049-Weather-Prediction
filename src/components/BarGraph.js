@@ -8,8 +8,8 @@ const BarGraph = ({ data, dataName, displayName }) => {
     if (data.length === 0) return;
 
     const width = 800;
-    const height = 400;
-    const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+    const height = 600;
+    const margin = { top: 20, right: 70, bottom: 40, left: 70 };
 
     // Define the SVG element
     const svg = d3.select(svgRef.current);
@@ -36,6 +36,29 @@ const BarGraph = ({ data, dataName, displayName }) => {
     const y = d3.scaleLinear()
     .domain([0, d3.max(data, d => d[dataName])]).nice()
     .range([height - margin.bottom, margin.top]);
+
+    // Add background grid
+    svg.append('g')
+    .attr('class', 'x-grid')
+    .selectAll('line')
+    .data(x.ticks())
+    .join('line')
+    .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+    .attr('x1', d => x(d))
+    .attr('x2', d => x(d))
+    .attr('y1', margin.top)
+    .attr('y2', height - margin.bottom);
+
+    svg.append('g')
+    .attr('class', 'y-grid')
+    .selectAll('line')
+    .data(y.ticks())
+    .join('line')
+    .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+    .attr('x1', margin.left)
+    .attr('x2', width - margin.right)
+    .attr('y1', d => y(d))
+    .attr('y2', d => y(d));
 
     // Define the tooltip
     const tooltip = d3.select('body').append('div')
@@ -138,6 +161,16 @@ const BarGraph = ({ data, dataName, displayName }) => {
         x.range([margin.left, width - margin.right].map(d => event.transform.applyX(d)));
         svg.selectAll('.bar').attr('x', d => x(d["Date"])).attr('width', x.bandwidth());
         svg.selectAll('.x-axis').call(xAxis);
+
+        // rescale the grid
+        svg.selectAll('.x-grid').selectAll('line')
+        .data(x.ticks())
+        .join('line')
+        .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+        .attr('x1', d => x(d))
+        .attr('x2', d => x(d))
+        .attr('y1', margin.top)
+        .attr('y2', height - margin.bottom);
       });
 
       svg.call(zoom);

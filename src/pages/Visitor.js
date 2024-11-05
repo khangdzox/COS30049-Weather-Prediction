@@ -13,7 +13,7 @@ const mapNameToLabel = {
   "Monthly mean daily global solar exposure": 'Monthly mean daily global solar exposure (MJ/m^2/day)',
   "Monthly mean minimum temperature": 'Monthly mean minimum temperature (°C)',
   "Monthly mean maximum temperature": 'Monthly mean maximum temperature (°C)',
-  "Monthly number of arriving visitors": 'Monthly number of arriving visitors',
+  "Number of arriving visitors": 'Monthly number of arriving visitors',
 }
 
 function Home() {
@@ -117,55 +117,27 @@ function Home() {
   };
 
   useEffect(() => {
-    // fetch(`http://localhost:3000/data/visitor?column=${firstData}&from=${fromDate}&to=${toDate}`)
-    // .then(response => response.json())
-    // .then(data => setFirstData(data))
-    // .catch(error => console.error('Error fetching data:', error));
-
-    setFirstData([
-      {"Date": '2020-01', "Monthly rainfall": 41.2},
-      {"Date": '2020-02', "Monthly rainfall": 34.6},
-      {"Date": '2020-03', "Monthly rainfall": 24.6},
-      {"Date": '2020-04', "Monthly rainfall": 39.6},
-      {"Date": '2020-05', "Monthly rainfall": 78.4},
-      {"Date": '2020-06', "Monthly rainfall": 27.6},
-      {"Date": '2020-07', "Monthly rainfall": 35},
-      {"Date": '2020-08', "Monthly rainfall": 31},
-      {"Date": '2020-09', "Monthly rainfall": 65.2},
-      {"Date": '2020-10', "Monthly rainfall": 124.4},
-      {"Date": '2020-11', "Monthly rainfall": 38.2},
-      {"Date": '2020-12', "Monthly rainfall": 18.4},
-    ]);
-
-  }, [firstCol, fromDate, toDate]);
+    if (location && firstCol && fromDate && toDate) {
+      fetch(`http://localhost:8000/api/data/visitors?state=${location}&columns=${firstCol}&fromDate=${fromDate}&toDate=${toDate}`)
+      .then(response => response.json())
+      .then(data => setFirstData(data))
+      .catch(error => console.error('Error fetching data:', error));
+    }
+  }, [location, firstCol, fromDate, toDate]);
 
   useEffect(() => {
-    if (secondCol === 'Date') {
-      setSecondData([]);
-      return;
+    if (location && secondCol && fromDate && toDate) {
+      if (secondCol === 'Date') {
+        setSecondData([]);
+        return;
+      }
+
+      fetch(`http://localhost:8000/api/data/visitors?state=${location}&columns=${secondCol}&fromDate=${fromDate}&toDate=${toDate}`)
+      .then(response => response.json())
+      .then(data => setSecondData(data))
+      .catch(error => console.error('Error fetching data:', error));
     }
-
-    // fetch(`http://localhost:3000/data/visitor?column=${secondData}&from=${fromDate}&to=${toDate}`)
-    // .then(response => response.json())
-    // .then(data => setSecondData(data))
-    // .catch(error => console.error('Error fetching data:', error));
-
-    setSecondData([
-      {"Date": '2020-01', "Monthly number of arriving visitors": 60170},
-      {"Date": '2020-02', "Monthly number of arriving visitors": 70240},
-      {"Date": '2020-03', "Monthly number of arriving visitors": 70440},
-      {"Date": '2020-04', "Monthly number of arriving visitors": 57450},
-      {"Date": '2020-05', "Monthly number of arriving visitors": 44090},
-      {"Date": '2020-06', "Monthly number of arriving visitors": 44130},
-      {"Date": '2020-07', "Monthly number of arriving visitors": 60560},
-      {"Date": '2020-08', "Monthly number of arriving visitors": 54180},
-      {"Date": '2020-09', "Monthly number of arriving visitors": 47200},
-      {"Date": '2020-10', "Monthly number of arriving visitors": 69020},
-      {"Date": '2020-11', "Monthly number of arriving visitors": 78130},
-      {"Date": '2020-12', "Monthly number of arriving visitors": 89380},
-    ]);
-
-  }, [secondCol, fromDate, toDate]);
+  }, [location, secondCol, fromDate, toDate]);
 
   return (
     <>
@@ -184,12 +156,12 @@ function Home() {
                       required
                       error={missingFields.includes('Date')}
                       label={label}
-                      type="date"
+                      type="month"
                       fullWidth
                       name={name}
                       value={
-                        (formData.Year && formData.Month && formData.Day) ?
-                        `${formData.Year}-${formData.Month}-${formData.Day}` :
+                        (formData.Year && formData.Month) ?
+                        `${formData.Year}-${formData.Month}` :
                         ''
                       }
                       onChange={handleFormDataChange}
@@ -229,7 +201,7 @@ function Home() {
                       </FormControl>
                     </Grid2>
                   )
-                } else if (name !== "Monthly number of arriving visitors") {
+                } else if (name !== "Number of arriving visitors") {
                   return (
                     <Grid2 size={{ xs: 12, sm: 4 }} key={name}>
                       <TextField
@@ -300,7 +272,7 @@ function Home() {
                 <MenuItem value="Monthly mean daily global solar exposure">Monthly mean daily global solar exposure (MJ/m^2/day)</MenuItem>
                 <MenuItem value="Monthly mean minimum temperature">Monthly mean minimum temperature (°C)</MenuItem>
                 <MenuItem value="Monthly mean maximum temperature">Monthly mean maximum temperature (°C)</MenuItem>
-                <MenuItem value="Monthly number of arriving visitors">Monthly number of arriving visitors</MenuItem>
+                <MenuItem value="Number of arriving visitors">Monthly number of arriving visitors</MenuItem>
               </Select>
             </FormControl>
           </Grid2>
@@ -319,20 +291,20 @@ function Home() {
                 <MenuItem value="Monthly mean daily global solar exposure">Monthly mean daily global solar exposure (MJ/m^2/day)</MenuItem>
                 <MenuItem value="Monthly mean minimum temperature">Monthly mean minimum temperature (°C)</MenuItem>
                 <MenuItem value="Monthly mean maximum temperature">Monthly mean maximum temperature (°C)</MenuItem>
-                <MenuItem value="Monthly number of arriving visitors">Monthly number of arriving visitors</MenuItem>
+                <MenuItem value="Number of arriving visitors">Monthly number of arriving visitors</MenuItem>
               </Select>
             </FormControl>
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 3}} >
             <TextField
-            label="From Date"
-            type="date"
+            label="From Month"
+            type="month"
             value={fromDate}
             onChange={handleFromDateChange}
             slotProps={{
               inputLabel: { shrink: true },
-              htmlInput: { max: new Date().toISOString().split('T')[0] }
+              htmlInput: { min: '2000-01', max: '2019-12' }
             }}
             fullWidth
             />
@@ -340,13 +312,13 @@ function Home() {
 
           <Grid2 size={{ xs: 12, sm: 3}} >
             <TextField
-            label="To Date"
-            type="date"
+            label="To Month"
+            type="month"
             value={toDate}
             onChange={handleToDateChange}
             slotProps={{
               inputLabel: { shrink: true },
-              htmlInput: { min: fromDate, max: new Date().toISOString().split('T')[0]}
+              htmlInput: { min: fromDate, max: '2019-12' }
             }}
             fullWidth
             />

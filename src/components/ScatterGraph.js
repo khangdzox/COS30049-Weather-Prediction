@@ -34,6 +34,29 @@ const ScatterGraph = ({ firstData, firstDataName, firstDisplayName, secondData, 
 
     const yAxis = d3.axisLeft(y);
 
+    // Add background grid
+    svg.append('g')
+    .attr('class', 'x-grid')
+    .selectAll('line')
+    .data(x.ticks())
+    .join('line')
+    .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+    .attr('x1', d => x(d))
+    .attr('x2', d => x(d))
+    .attr('y1', margin.top)
+    .attr('y2', height - margin.bottom);
+
+    svg.append('g')
+    .attr('class', 'y-grid')
+    .selectAll('line')
+    .data(y.ticks())
+    .join('line')
+    .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+    .attr('x1', margin.left)
+    .attr('x2', width - margin.right)
+    .attr('y1', d => y(d))
+    .attr('y2', d => y(d));
+
     // Define the tooltip
     const tooltip = d3.select('body').append('div')
     .attr('class', 'tooltip')
@@ -128,6 +151,25 @@ const ScatterGraph = ({ firstData, firstDataName, firstDisplayName, secondData, 
 
       svg.selectAll('.x-axis').call(xAxis.scale(newX));
       svg.selectAll('.y-axis').call(yAxis.scale(newY));
+
+      // rescale the grid
+      svg.selectAll('.x-grid').selectAll('line')
+      .data(newX.ticks())
+      .join('line')
+      .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+      .attr('x1', d => newX(d))
+      .attr('x2', d => newX(d))
+      .attr('y1', margin.top)
+      .attr('y2', height - margin.bottom);
+
+      svg.selectAll('.y-grid').selectAll('line')
+      .data(newY.ticks())
+      .join('line')
+      .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+      .attr('x1', margin.left)
+      .attr('x2', width - margin.right)
+      .attr('y1', d => newY(d))
+      .attr('y2', d => newY(d));
 
       svg.selectAll('circle')
       .attr('cy', d => newY(d.first))

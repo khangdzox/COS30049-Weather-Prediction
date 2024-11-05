@@ -10,8 +10,8 @@ const LineGraph = ({ data, dataName, displayName }) => {
     if (data.length === 0) return;
 
     const width = 800;
-    const height = 400;
-    const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+    const height = 600;
+    const margin = { top: 20, right: 70, bottom: 40, left: 70 };
 
     // Define the SVG element
     const svg = d3.select(svgRef.current);
@@ -71,6 +71,29 @@ const LineGraph = ({ data, dataName, displayName }) => {
     .attr('y', 15)
     .attr('text-anchor', 'middle')
     .text(displayName);
+
+    // Add background grid
+    svg.append('g')
+    .attr('class', 'x-grid')
+    .selectAll('line')
+    .data(x.ticks())
+    .join('line')
+    .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+    .attr('x1', d => x(d))
+    .attr('x2', d => x(d))
+    .attr('y1', margin.top)
+    .attr('y2', height - margin.bottom);
+
+    svg.append('g')
+    .attr('class', 'y-grid')
+    .selectAll('line')
+    .data(y.ticks())
+    .join('line')
+    .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+    .attr('x1', margin.left)
+    .attr('x2', width - margin.right)
+    .attr('y1', d => y(d))
+    .attr('y2', d => y(d));
 
     // Draw the line
     const path = svg.append('path')
@@ -174,6 +197,16 @@ const LineGraph = ({ data, dataName, displayName }) => {
       const newX = event.transform.rescaleX(x);
 
       svg.select('.x-axis').call(xAxis.scale(newX));
+
+      // rescale the grid
+      svg.selectAll('.x-grid').selectAll('line')
+      .data(newX.ticks())
+      .join('line')
+      .attr('stroke', 'rgba(0, 0, 0, 0.1)')
+      .attr('x1', d => newX(d))
+      .attr('x2', d => newX(d))
+      .attr('y1', margin.top)
+      .attr('y2', height - margin.bottom);
 
       path.attr('d', line.x(d => newX(timeParse(d["Date"]))));
 
