@@ -42,6 +42,7 @@ const mapWeatherTypeToGraphType = (weatherType) => {
 
 function Home() {
   const [location, setLocation] = useOutletContext();
+  const [loading, setLoading] = useState(false);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [weatherType, setWeatherType] = useState('');
@@ -226,10 +227,15 @@ function Home() {
   };
 
   useEffect(() => {
+    setLoading(true);
+
     if (fromDate && toDate && weatherType && location) {
       fetch(`http://localhost:8000/api/data/weather?state=${location}&weatherType=${weatherType}&fromDate=${fromDate}&toDate=${toDate}`)
       .then(response => response.json())
-      .then(data => setGraphData(data))
+      .then(data => {
+        setGraphData(data);
+        setLoading(false);
+      })
       .catch(error => console.error('Error fetching data:', error));
     }
   }, [fromDate, toDate, weatherType, location]);
@@ -450,7 +456,9 @@ function Home() {
         <Paper elevation={3} sx={{ mt: 2, mb: 2, p: 2 }}>
           {!weatherType || !toDate || !fromDate ? (
             <Alert severity="info">Please select a weather type, from date and to date to display the graph</Alert>
-          ) : mapWeatherTypeToGraphType(weatherType) === 'line' ? (
+          ) : (loading) ? (
+            <Alert severity="info">Loading...</Alert>
+          ) : (mapWeatherTypeToGraphType(weatherType) === 'line') ? (
             <LineGraph data={graphData} dataName={weatherType} displayName={mapNameToLabel[weatherType]} />
           ) : (
             <BarGraph data={graphData} dataName={weatherType} displayName={mapNameToLabel[weatherType]} />
