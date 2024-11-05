@@ -81,8 +81,22 @@ function Home() {
       setFormResults({severity: 'error', message: 'Please fill in the required fields.'});
       setMissingFields(_missingFields);
     } else {
-      setFormResults({severity: 'success', message: 'Weather data submitted successfully!'});
       setMissingFields([]);
+      fetch('http://localhost:8000/api/predict/visitor', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+      .then(response => response.json())
+      .then(data => {
+        setFormResults({severity: 'success', message: `Predicted number of visitors: ${data['Number of arriving visitors']} visitors.`});
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        setFormResults({severity: 'error', message: 'An error occurred while submitting the form.'});
+      });
     }
   }
 

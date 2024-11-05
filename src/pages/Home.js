@@ -49,6 +49,7 @@ function Home() {
   const [formResult, setFormResults] = useState({severity: '', message: ''});
   const [missingFields, setMissingFields] = useState([]);
   const [graphData, setGraphData] = useState([]);
+  const [forecastType, setForecastType] = useState('logistic');
   const [formData, setFormData] = useState({
     Day: '',
     Month: '',
@@ -171,8 +172,37 @@ function Home() {
       setFormResults({severity: 'error', message: 'Please fill in the required fields.'});
       setMissingFields(_missingFields);
     } else {
-      setFormResults({severity: 'success', message: 'Weather data submitted successfully!'});
       setMissingFields([]);
+      if (forecastType === 'linear') {
+        fetch('http://localhost:8000/api/predict/rain_mm', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          setFormResults({severity: 'success', message: `Forecasting result: ${Math.round(data.rain_prediction_mm * 1000) / 1000} mm of rain tomorrow`});
+        })
+        .catch(error => console.error('Error submitting form data:', error));
+      } else {
+        fetch('http://localhost:8000/api/predict/rain_indicator', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          setFormResults({severity: 'success', message: `Forecasting result: ${data.rain_prediction_indicator ? "There will be rain tomorrow" : "There will be no rain tomorrow"}`});
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          setFormResults({severity: 'error', message: 'An error occurred while submitting the form.'});
+        });
+      }
     }
   }
 
@@ -370,6 +400,22 @@ function Home() {
             }
 
             <Grid2 size={{ xs: 12, sm: 4 }}>
+              <FormControl variant="outlined" fullWidth size='small'>
+                <InputLabel>Forecasting Type</InputLabel>
+                <Select
+                name='forecastType'
+                value={forecastType}
+                onChange={(event) => setForecastType(event.target.value)}
+                label="Forecasting Type"
+                sx={{ textAlign: 'left' }}
+                >
+                  <MenuItem value="logistic">Logistic Regression (Rain/No rain)</MenuItem>
+                  <MenuItem value="linear">Linear Regression (Amount of rain)</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid2>
+
+            <Grid2 size={{ xs: 6, sm: 2 }}>
               <Button
               variant="contained"
               color="primary"
@@ -382,7 +428,7 @@ function Home() {
               </Button>
             </Grid2>
 
-            <Grid2 size={{ xs: 12, sm: 4 }}>
+            <Grid2 size={{ xs: 6, sm: 2 }}>
               <Button
               variant="contained"
               color="error"
@@ -397,7 +443,7 @@ function Home() {
           </Grid2>
         </form>
 
-        {formResult.message && <Alert severity={formResult.severity}>{formResult.message}</Alert>}
+        {formResult.message ? <Alert severity={formResult.severity}>{formResult.message}</Alert> : null}
       </Box>
 
       {/* New Selector for Rainfall, Temperature, Wind Speed and Date Inputs */}
