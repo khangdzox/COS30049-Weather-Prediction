@@ -154,14 +154,14 @@ const NavBar = ({ location, setLocation }) => {
                 <MenuItem value="" disabled>
                   Select Location
                 </MenuItem>
-                <MenuItem value="Melbourne">Melbourne</MenuItem>
-                <MenuItem value="Sydney">Sydney</MenuItem>
-                <MenuItem value="Brisbane">Brisbane</MenuItem>
-                <MenuItem value="Perth">Perth</MenuItem>
-                <MenuItem value="Adelaide">Adelaide</MenuItem>
-                <MenuItem value="Canberra">Canberra</MenuItem>
-                <MenuItem value="Hobart">Hobart</MenuItem>
-                <MenuItem value="Darwin">Darwin</MenuItem>
+                <MenuItem value="VIC">Victoria</MenuItem>
+                <MenuItem value="NSW">New South Wales</MenuItem>
+                <MenuItem value="QLD">Queensland</MenuItem>
+                <MenuItem value="SA">South Australia</MenuItem>
+                <MenuItem value="WA">Western Australia</MenuItem>
+                <MenuItem value="TAS">Tasmania</MenuItem>
+                <MenuItem value="NT">Northern Territory</MenuItem>
+                <MenuItem value="ACT">Australian Capital Territory</MenuItem>
               </Select>
             </FormControl>
           </Box>

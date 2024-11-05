@@ -5,7 +5,7 @@ import { Outlet } from 'react-router-dom';
 import { Container } from '@mui/material';
 
 function App() {
-  const [location, setLocation] = React.useState('Melbourne');
+  const [location, setLocation] = React.useState('VIC');
 
   return (
     <div className="App">
