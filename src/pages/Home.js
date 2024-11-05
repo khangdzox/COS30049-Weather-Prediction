@@ -43,12 +43,14 @@ const mapWeatherTypeToGraphType = (weatherType) => {
 
 function Home() {
   const [location, setLocation] = useOutletContext();
+  const [today, setToday] = useState('2024-09-23');
   const [loading, setLoading] = useState(false);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [weatherType, setWeatherType] = useState('');
   const [formResult, setFormResults] = useState({severity: '', message: ''});
-  const [forecastData, setForecastData] = useState([]); // Store forecast data from API
+  const [forecastCardData, setForecastCardData] = useState([]); // Store forecast data from API
+  const [forecastCardPrediction, setForecastCardPrediction] = useState(''); // Store forecast prediction
   const [missingFields, setMissingFields] = useState([]);
   const [graphData, setGraphData] = useState([]);
   const [forecastType, setForecastType] = useState('logistic');
@@ -58,27 +60,43 @@ function Home() {
     Spd_9am: '', MSLP_9am: '', Temp_3pm: '', RH_3pm: '', Cld_3pm: '', Dir_3pm: '', Spd_3pm: '', MSLP_3pm: '', Temp_Diff: '', Rain_Indicator: ''
   });
 
-  
   useEffect(() => {
-    // Fetch forecast data from the API
-    const fetchForecastData = async () => {
-      try {
-        const response = await fetch(`https://api/data/weather?state=${state}&weatherType=${weatherType}&fromDate=${fromDate}&toDate=${toDate}`);
-        
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
+    // setToday(new Date().toISOString().split('T')[0]);
+    const threedaysago = new Date(today);
+    threedaysago.setDate(threedaysago.getDate() - 3);
 
-        // Parse the JSON response
-        const data = await response.json();
-        setForecastData(data); 
-      } catch (error) {
-        console.error('Error fetching forecast data:', error);
-      }
-    };
+    fetch(`http://localhost:8000/api/data/weather?state=${location}&fromDate=${threedaysago.toISOString().split('T')[0]}&toDate=${today}`)
+    .then(response => response.json())
+    .then(data => {
+      setForecastCardData(data);
+    })
+    .catch(error => console.error('Error fetching forecast data:', error));
+  }, [location, today]);
 
-    fetchForecastData();
-  }, [state, weatherType, fromDate, toDate]);
+  useEffect(() => {
+    if (forecastCardData.length > 0) {
+      // get a copy of the last day's data
+      const todayData = {...forecastCardData[forecastCardData.length - 1]};
+      todayData.Day = new Date(today).getDay();
+      todayData.Month = new Date(today).getMonth();
+      todayData.Year = new Date(today).getFullYear();
+      todayData.State = location;
+      delete todayData.Date;
+
+      fetch('http://localhost:8000/api/predict/rain_mm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(todayData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        setForecastCardPrediction(data.rain_prediction_mm);
+      })
+      .catch(error => console.error('Error fetching forecast prediction:', error));
+    }
+  }, [forecastCardData, location, today]);
 
   const handleFormDataChange = (event) => {
     const { name, value } = event.target;
@@ -189,14 +207,15 @@ function Home() {
     <>
       {/* Forecast Card Stack */}
       <Stack direction='row' spacing={2} sx={{ mb: 5 }} justifyContent='center'>
-        {forecastData.map((item, index) => (
+        {forecastCardData.map((item, index) => (
           <ForecastCard
             key={index}
-            date={item.date}
-            rain={item.rain}
+            date={item.Date ? item.Date.split('T')[0] : item.Date}
+            rain={item.Rain_mm}
+            isToday={index === forecastCardData.length - 1}
             display={{
               xs: 'none',
-              sm: index < forecastData.length - 2 ? 'none' : 'block', // Only show last two on small screens
+              sm: index < forecastCardData.length - 1 ? 'none' : 'block', // Only show last two on small screens
               md: 'block'
             }}
           />
@@ -212,6 +231,9 @@ function Home() {
         >
           &#8594;
         </Box>
+        <ForecastCard date={
+          new Date(new Date().setDate(new Date(today).getDate() + 1)).toISOString().split('T')[0]
+        } rain={forecastCardPrediction} isTomorrow display='block' />
       </Stack>
 
       {/* Responsive Form for Weather Data Inputs */}
