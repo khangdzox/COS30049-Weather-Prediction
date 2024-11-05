@@ -7,7 +7,7 @@ const mapNameToConfig = {
   'Rain_mm': {
     displayName: 'Rainfall (mm)',
     colorInterpolate: d3.interpolateBlues,
-    domain: null
+    domain: [0, 200]
   },
   'Temp_Max': {
     displayName: 'Maximum Temperature (°C)',
