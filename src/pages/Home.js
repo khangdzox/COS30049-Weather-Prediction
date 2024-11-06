@@ -62,6 +62,8 @@ function Home() {
     Spd_9am: '', MSLP_9am: '', Temp_3pm: '', RH_3pm: '', Cld_3pm: '', Dir_3pm: '', Spd_3pm: '', MSLP_3pm: '', Temp_Diff: '', Rain_Indicator: ''
   });
 
+  // Request forecast data from the API
+  // Get today and three days ago to fetch the forecast data for the last four days
   useEffect(() => {
     // setToday(new Date().toISOString().split('T')[0]);
     const threedaysago = new Date(today);
@@ -75,6 +77,10 @@ function Home() {
     .catch(error => console.error('Error fetching forecast data:', error));
   }, [location, today]);
 
+  // Request forecast prediction from the API
+  // Get the last day's data and send it to the API to get the prediction for the next day
+  // Edit the data to remove the Date field and add Day, Month, Year and State fields to match the API's expected input
+  // Set the forecast prediction to the response from the API
   useEffect(() => {
     if (forecastCardData.length > 0) {
       // get a copy of the last day's data
@@ -100,6 +106,9 @@ function Home() {
     }
   }, [forecastCardData, location, today]);
 
+  // Check if the user has selected a date and state to load the data
+  // If the user has not selected a date or state, display an error message
+  // Else, fetch the data from the API and set the form data to the response
   const handleLoadPreviousData = () => {
     if (loadDate === '') {
       setFormResults({severity: 'error', message: 'Please select a date to load the data'});
@@ -114,6 +123,7 @@ function Home() {
     fetch(`http://localhost:8000/api/data/weather?state=${loadState}&fromDate=${loadDate}&toDate=${loadDate}`)
     .then(response => response.json())
     .then(data => {
+      // Update the data to match the form fields
       data[0].Day = loadDate.split('-')[2];
       data[0].Month = loadDate.split('-')[1];
       data[0].Year = loadDate.split('-')[0];
@@ -128,6 +138,7 @@ function Home() {
     });
   }
 
+  // Update the form data based on the input field
   const handleFormDataChange = (event) => {
     const { name, value } = event.target;
 
@@ -199,12 +210,14 @@ function Home() {
     });
   };
 
+  // Handle form validation and submission
   const handleFormSubmit = (event) => {
     event.preventDefault();
     console.log(formData);
 
     let _missingFields = [];
 
+    // Check if any required fields are missing and display an error message
     for (const key in formData) {
 
       if (formData[key] === '') {
@@ -220,6 +233,10 @@ function Home() {
     if (_missingFields.length > 0) {
       setFormResults({severity: 'error', message: 'Please fill in the required fields.'});
       setMissingFields(_missingFields);
+
+    // If all required fields are filled, submit the data to the API
+    // If the forecasting type is linear, send the data to the linear regression endpoint
+    // If the forecasting type is logistic, send the data to the logistic regression endpoint
     } else {
       setMissingFields([]);
       if (forecastType === 'linear') {
@@ -232,6 +249,7 @@ function Home() {
         })
         .then(response => response.json())
         .then(data => {
+          // Display the rounded forecasting result
           setFormResults({severity: 'success', message: `Forecasting result: ${Math.round(data.rain_prediction_mm * 1000) / 1000} mm of rain tomorrow`});
         })
         .catch(error => console.error('Error submitting form data:', error));
@@ -245,6 +263,7 @@ function Home() {
         })
         .then(response => response.json())
         .then(data => {
+          // Display the forecasting result
           setFormResults({severity: 'success', message: `Forecasting result: ${data.rain_prediction_indicator ? "There will be rain tomorrow" : "There will be no rain tomorrow"}`});
         })
         .catch((error) => {
@@ -255,6 +274,7 @@ function Home() {
     }
   };
 
+  // Reset the form data and results
   const handleFormReset = () => {
     setFormData({
       Day: '', Month: '', Year: '', State: '', Temp_Min: '', Temp_Max: '', Rain_mm: '', Evaporation_mm: '', Sun_hours: '',
@@ -265,8 +285,11 @@ function Home() {
     setMissingFields([]);
   };
 
+  // Handle weather type change
   const handleWeatherTypeChange = (event) => setWeatherType(event.target.value);
 
+  // Handle date change
+  // If the new from date is greater than the to date, set the to date to the from date
   const handleFromDateChange = (event) => {
     const newFromDate = event.target.value;
     setFromDate(newFromDate);
@@ -275,6 +298,8 @@ function Home() {
     }
   };
 
+  // Handle to date change
+  // If the new to date is less than the from date, set the from date to the to date
   const handleToDateChange = (event) => {
     const newToDate = event.target.value;
     if (newToDate >= fromDate) {
@@ -282,6 +307,7 @@ function Home() {
     }
   };
 
+  // Fetch weather data from the API based on the selected weather type, from date, to date and location
   useEffect(() => {
     setLoading(true);
 
@@ -333,6 +359,7 @@ function Home() {
       <Box sx={{ flexGrow: 1, mb: 5 }}>
         <Typography variant="h5" align="left" gutterBottom>Manual Weather Data Inputs</Typography>
 
+        {/* Input fields and button for loading previous data */}
         <Grid2 container spacing={2} alignItems="center" justifyContent="center" sx={{ mb: 2 }} >
           <Grid2 size={{ xs: 12, sm: 2 }}>
             <Typography variant="body1" align="left">Load previous data</Typography>
@@ -392,12 +419,14 @@ function Home() {
           </Grid2>
         </Grid2>
 
+        {/* Form for manual weather data inputs */}
         <form noValidate onSubmit={handleFormSubmit} onReset={handleFormReset}>
           <Grid2 container spacing={2} alignItems="center" justifyContent="center" sx={{ mb: 2 }}>
             {
               Object.entries(mapNameToLabel).map(([name, label]) => {
                 if (name === 'Date') {
                   return (
+                    // Split the date into Year, Month and Day fields
                     <Grid2 size={{ xs: 12, sm: 4 }} key={name}>
                       <TextField
                       required
@@ -421,6 +450,7 @@ function Home() {
                   )
                 } else if (name === 'State') {
                   return (
+                    // Select the state from the dropdown menu
                     <Grid2 size={{ xs: 12, sm: 4 }} key={name}>
                       <FormControl
                       variant="outlined"
@@ -450,6 +480,7 @@ function Home() {
                   )
                 } else if (name === 'Wind_Direction' || name === 'Dir_9am' || name === 'Dir_3pm') {
                   return (
+                    // Select the wind direction from the dropdown menu
                     <Grid2 size={{ xs: 12, sm: 4 }} key={name}>
                     <FormControl
                     variant="outlined"
@@ -488,6 +519,7 @@ function Home() {
                   )
                 } else {
                   return (
+                    // Input field for all other fields
                     <Grid2 size={{ xs: 12, sm: 4 }} key={name}>
                       <TextField
                       required
@@ -506,6 +538,7 @@ function Home() {
               })
             }
 
+            {/* Forecasting Type Selector */}
             <Grid2 size={{ xs: 12, sm: 4 }}>
               <FormControl variant="outlined" fullWidth size='small'>
                 <InputLabel>Forecasting Type</InputLabel>
@@ -522,6 +555,7 @@ function Home() {
               </FormControl>
             </Grid2>
 
+            {/* Submit and Clear Buttons */}
             <Grid2 size={{ xs: 6, sm: 2 }}>
               <Button
                 variant="contained"
@@ -550,6 +584,8 @@ function Home() {
           </Grid2>
         </form>
 
+        {/* Form Result Alert */}
+        {/* If the form result has a message, display an alert with the message */}
         {formResult.message ? <Alert severity={formResult.severity}>{formResult.message}</Alert> : null}
       </Box>
 
@@ -574,6 +610,7 @@ function Home() {
               </Select>
             </FormControl>
           </Grid2>
+
           <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField
             label="From Date"
@@ -587,6 +624,7 @@ function Home() {
             fullWidth
             />
           </Grid2>
+
           <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField
             label="To Date"
@@ -603,6 +641,10 @@ function Home() {
         </Grid2>
 
         {/* Weather Chart */}
+        {/* If the weather type, from date and to date are selected, display the weather chart */}
+        {/* If the data is loading, display a loading message */}
+        {/* If the weather type is Rainfall, Evaporation or Wind Speed, display a bar graph */}
+        {/* If the weather type is Temperature, display a line graph */}
         <Paper elevation={3} sx={{ mt: 2, mb: 2, p: 2 }}>
           {!weatherType || !toDate || !fromDate ? (
             <Alert severity="info">Please select a weather type, from date and to date to display the graph</Alert>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, Typography, Box } from '@mui/material';
 
+// Function to get the weather icon based on the amount of rain
 const getWeatherIcon = (rain) => {
   if (rain < 1) {
     return '☀️';

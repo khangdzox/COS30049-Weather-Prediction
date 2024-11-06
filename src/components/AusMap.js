@@ -33,19 +33,23 @@ const AusMap = ({ data, dataName, displayName, colorInterpolate, domain }) => {
     const width = 800;
     const height = 700;
 
+    // Define the SVG element
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
     svg.attr('viewBox', [0, 0, width, height]);
 
+    // Define the projection and path
     const projection = d3.geoMercator()
     .center([133, -28])
     .scale(1000)
     .translate([width / 2, height / 2]);
     const path = d3.geoPath().projection(projection);
 
+    // Define the color scale
     const colorScale = d3.scaleSequential(colorInterpolate ? colorInterpolate : d3.interpolateYlOrRd)
     .domain(domain ? domain : d3.extent(data, d => d[dataName]));
 
+    // Define the tooltip
     const tooltip = d3.select('body').append('div')
     .attr('class', 'tooltip')
     .style('position', 'absolute')
@@ -56,12 +60,15 @@ const AusMap = ({ data, dataName, displayName, colorInterpolate, domain }) => {
     .style('opacity', 0)
     .style('pointer-events', 'none');
 
+    // Load the Australia map data
     const aus = topojson.feature(ausMapData, ausMapData.objects.austates).features;
 
+    // Draw the color legend
     svg.append('g')
     .attr('transform', `translate(50, ${height - 50})`)
     .append(() => Legend(colorScale, { title: displayName }));
 
+    // Draw the map
     svg.selectAll('path')
     .data(aus)
     .enter().append('path')
@@ -72,6 +79,7 @@ const AusMap = ({ data, dataName, displayName, colorInterpolate, domain }) => {
     })
     .attr('stroke', '#555')
     .on('mouseover', (event, d) => {
+      // Show tooltip with state name and temperature
       const stateTemp = data.find(temp => temp['State'] === mapIdToState[d.id]);
 
       tooltip.html(`<b>State</b>: ${mapStateToName[mapIdToState[d.id]]}<br /> <b>${displayName}</b>: ${stateTemp ? stateTemp[dataName] : 'No data'}`)
@@ -95,9 +103,11 @@ const AusMap = ({ data, dataName, displayName, colorInterpolate, domain }) => {
       .attr('stroke-opacity', 1);
     })
     .on('mousemove', (event) => {
+      // Move tooltip with mouse
       tooltip.style('top', `${event.pageY - 10}px`).style('left', `${event.pageX + 10}px`);
     })
     .on('mouseout', () => {
+      // Hide tooltip and reset state opacity
       tooltip.transition()
       .duration(200)
       .style('opacity', 0);

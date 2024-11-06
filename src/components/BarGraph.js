@@ -122,12 +122,14 @@ const BarGraph = ({ data, dataName, displayName }) => {
       .style('left', `${event.pageX + 5}px`)
       .style('top', `${event.pageY - 28}px`);
 
+      // Highlight the bar
       d3.select(event.currentTarget)
       .transition()
       .duration(200)
       .attr('fill', 'lightsteelblue');
     })
     .on('mouseout', (event) => {
+      // Hide the tooltip and reset the bar color
       tooltip.transition()
       .duration(200)
       .style('opacity', 0);
@@ -147,6 +149,7 @@ const BarGraph = ({ data, dataName, displayName }) => {
       .translateExtent(extent)
       .extent(extent)
       .on('zoom', (event) => {
+        // Update the x-axis and the bars
         x.range([margin.left, width - margin.right].map(d => event.transform.applyX(d)));
         svg.selectAll('.bar').attr('x', d => x(d["Date"])).attr('width', x.bandwidth());
         svg.selectAll('.x-axis').call(xAxis);

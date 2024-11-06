@@ -172,16 +172,19 @@ const LineGraph = ({ data, dataName, displayName }) => {
       .style('left', `${event.pageX + 5}px`)
       .style('top', `${event.pageY - 28}px`);
 
+      // highlight the dot
       d3.select(event.currentTarget)
       .transition()
       .duration(200)
       .attr('fill', 'lightsteelblue');
     })
     .on('mouseout', (event, d) => {
+      // hide the tooltip
       tooltip.transition()
       .duration(200)
       .style('opacity', 0);
 
+      // reset the dot
       d3.select(event.currentTarget)
       .transition()
       .duration(200)
@@ -194,6 +197,7 @@ const LineGraph = ({ data, dataName, displayName }) => {
     .translateExtent([[margin.left, margin.top], [width - margin.right, height - margin.top]])
     .extent([[margin.left, margin.top], [width - margin.right, height - margin.top]])
     .on('zoom', (event) => {
+      // rescale the x-axis
       const newX = event.transform.rescaleX(x);
 
       svg.select('.x-axis').call(xAxis.scale(newX));
@@ -208,8 +212,10 @@ const LineGraph = ({ data, dataName, displayName }) => {
       .attr('y1', margin.top)
       .attr('y2', height - margin.bottom);
 
+      // rescale the line
       path.attr('d', line.x(d => newX(timeParse(d["Date"]))));
 
+      // rescale the dots
       svg.selectAll('.dot').attr('cx', d => newX(timeParse(d["Date"])));
     });
 

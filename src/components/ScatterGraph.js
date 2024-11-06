@@ -7,6 +7,7 @@ const ScatterGraph = ({ firstData, firstDataName, firstDisplayName, secondData, 
   useEffect(() => {
     if (firstData.length === 0 || secondData.length === 0) return;
 
+    // Combine the data
     const data = firstData.map((d, i) => ({ date: d["Date"], first: d[firstDataName], second: secondData[i][secondDataName] }));
 
     const width = 800;
@@ -146,6 +147,7 @@ const ScatterGraph = ({ firstData, firstDataName, firstDisplayName, secondData, 
     .translateExtent([[margin.left, margin.top], [width - margin.right, height - margin.top]])
     .extent([[margin.left, margin.top], [width - margin.right, height - margin.top]])
     .on('zoom', event => {
+      // rescale the x and y axis
       const newX = event.transform.rescaleX(x);
       const newY = event.transform.rescaleY(y);
 
@@ -171,6 +173,7 @@ const ScatterGraph = ({ firstData, firstDataName, firstDisplayName, secondData, 
       .attr('y1', d => newY(d))
       .attr('y2', d => newY(d));
 
+      // rescale the circles
       svg.selectAll('circle')
       .attr('cy', d => newY(d.first))
       .attr('cx', d => newX(d.second));

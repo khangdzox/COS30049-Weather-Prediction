@@ -29,14 +29,15 @@ const NavBar = ({ location, setLocation }) => {
   // const [toDate, setToDate] = useState('');
   const [anchorElNav, setAnchorElNav] = useState(null);
 
+  // Handle location change
   const handleLocationChange = (event) => {
     setLocation(event.target.value);
   };
 
+  // Handle open and close of the navigation menu
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
-
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
@@ -46,7 +47,9 @@ const NavBar = ({ location, setLocation }) => {
       <Container maxWidth="xl">
         <Toolbar disableGutters>
 
+          {/* Navigation menu for xs size with hamburger icon */}
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+            {/* Hamburger icon button */}
             <IconButton
               size="large"
               aria-label="menu appbar"
@@ -58,6 +61,7 @@ const NavBar = ({ location, setLocation }) => {
               <MenuIcon />
             </IconButton>
 
+            {/* Navigation menu */}
             <Menu
               id="menu-appbar"
               anchorEl={anchorElNav}
@@ -74,6 +78,7 @@ const NavBar = ({ location, setLocation }) => {
               onClose={handleCloseNavMenu}
               sx={{ display: { xs: 'block', md: 'none' } }}
             >
+              {/* Map link to label */}
               {Object.entries(mapLinkToLabel).map(([link, label]) => (
                 <MenuItem key={link} onClick={handleCloseNavMenu}>
                   <Typography
@@ -123,6 +128,7 @@ const NavBar = ({ location, setLocation }) => {
             Weather Forecast
           </Typography>
 
+          {/* Navigation links for md size */}
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'center', alignItems: 'center'}}>
             {Object.entries(mapLinkToLabel).map(([link, label]) => (
               <Button

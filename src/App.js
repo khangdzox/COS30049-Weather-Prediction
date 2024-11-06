@@ -5,6 +5,8 @@ import { Outlet } from 'react-router-dom';
 import { Container } from '@mui/material';
 
 function App() {
+  // Set the default location to VIC
+  // The location state is moved up from NavBar button for global access
   const [location, setLocation] = React.useState('VIC');
 
   return (

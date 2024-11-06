@@ -38,6 +38,7 @@ function Home() {
     "Monthly mean maximum temperature": '',
   });
 
+  // Update form data based on the input field
   const handleFormDataChange = (event) => {
     const { name, value } = event.target;
 
@@ -59,12 +60,14 @@ function Home() {
     });
   };
 
+  // Handle form submission
   const handleFormSubmit = (event) => {
     event.preventDefault();
     console.log(formData);
 
     let _missingFields = [];
 
+    // Check if any required fields are missing
     for (const key in formData) {
 
       if (formData[key] === '') {
@@ -77,9 +80,12 @@ function Home() {
       }
     }
 
+    // If any required fields are missing, display an error message
     if (_missingFields.length > 0) {
       setFormResults({severity: 'error', message: 'Please fill in the required fields.'});
       setMissingFields(_missingFields);
+
+    // Else, submit the form data
     } else {
       setMissingFields([]);
       fetch('http://localhost:8000/api/predict/visitor', {
@@ -91,6 +97,7 @@ function Home() {
       })
       .then(response => response.json())
       .then(data => {
+        // Display the predicted number of visitors
         setFormResults({severity: 'success', message: `Predicted number of visitors: ${data['Number of arriving visitors']} visitors.`});
       })
       .catch((error) => {
@@ -100,6 +107,7 @@ function Home() {
     }
   }
 
+  // Handle form reset
   const handleFormReset = () => {
     setFormData({
       Year: '',
@@ -114,9 +122,12 @@ function Home() {
     setMissingFields([]);
   }
 
+  // Handle data input changes
   const handleFirstColChange = (event) => setfirstCol(event.target.value);
   const handleSecondColChange = (event) => setsecondCol(event.target.value);
 
+  // Handle date input changes
+  // If the new from date is greater than the to date, set the to date to the from date
   const handleFromDateChange = (event) => {
     const newFromDate = event.target.value;
     setFromDate(newFromDate);
@@ -125,6 +136,8 @@ function Home() {
     }
   };
 
+  // Handle to date change
+  // If the new to date is less than the from date, set the from date to the to date
   const handleToDateChange = (event) => {
     const newToDate = event.target.value;
     if (newToDate >= fromDate) {
@@ -132,6 +145,7 @@ function Home() {
     }
   };
 
+  // Fetch the first data based on the selected location, first column, from date and to date
   useEffect(() => {
     setFirstData([]);
 
@@ -147,6 +161,7 @@ function Home() {
     }
   }, [location, firstCol, fromDate, toDate]);
 
+  // Fetch the second data based on the selected location, second column, from date and to date
   useEffect(() => {
     setSecondData([]);
 
@@ -171,12 +186,14 @@ function Home() {
       <Box sx={{ flexGrow: 1, mb: 5 }}>
         <Typography variant="h5" align="left" gutterBottom>Manual Data Inputs</Typography>
 
+        {/* Form for manual data inputs */}
         <form noValidate onSubmit={handleFormSubmit} onReset={handleFormReset}>
           <Grid2 container spacing={2} alignItems="center" justifyContent="center" sx={{ mb: 2 }}>
             {
               Object.entries(mapNameToLabel).map(([name, label]) => {
                 if (name === 'Date') {
                   return (
+                    // Date input field
                     <Grid2 size={{ xs: 12, sm: 4 }} key={name}>
                       <TextField
                       required
@@ -200,6 +217,7 @@ function Home() {
                   )
                 } else if (name === 'State') {
                   return (
+                    // State input field
                     <Grid2 size={{ xs: 12, sm: 4 }} key={name}>
                       <FormControl
                       variant="outlined"
@@ -229,6 +247,7 @@ function Home() {
                   )
                 } else if (name !== "Number of arriving visitors") {
                   return (
+                    // Other input fields
                     <Grid2 size={{ xs: 12, sm: 4 }} key={name}>
                       <TextField
                       required
@@ -249,6 +268,7 @@ function Home() {
               })
             }
 
+            {/* Submit and Clear Buttons */}
             <Grid2 size={{ xs: 12, sm: 4 }}>
               <Button
               variant="contained"
@@ -277,6 +297,8 @@ function Home() {
           </Grid2>
         </form>
 
+        {/* Display form results */}
+        {/* If there is a form result, display an alert with the message */}
         {formResult.message && <Alert severity={formResult.severity}>{formResult.message}</Alert>}
       </Box>
 
@@ -284,6 +306,7 @@ function Home() {
       <Box sx={{ flexGrow: 1 }}>
         <Typography variant="h5" align="left" gutterBottom>Weather to Visitors Data Chart</Typography>
 
+        {/* First Weather Data Input */}
         <Grid2 container spacing={2} alignItems="center" justifyContent="center">
           <Grid2 size={{ xs: 12, sm: 3}} >
             <FormControl variant="outlined" fullWidth>
@@ -303,6 +326,7 @@ function Home() {
             </FormControl>
           </Grid2>
 
+          {/* Second Weather Data Input */}
           <Grid2 size={{ xs: 12, sm: 3}} >
             <FormControl variant="outlined" fullWidth>
               <InputLabel>Second Data Type</InputLabel>
@@ -322,6 +346,7 @@ function Home() {
             </FormControl>
           </Grid2>
 
+          {/* Date Input */}
           <Grid2 size={{ xs: 12, sm: 3}} >
             <TextField
             label="From Month"
@@ -352,6 +377,10 @@ function Home() {
         </Grid2>
 
         {/* Weather Chart */}
+        {/* Display the weather chart based on the selected weather types and dates */}
+        {/* If the required fields are missing or the data is loading, display an info alert */}
+        {/* If the second column is Date, display a line graph */}
+        {/* Else, display a scatter graph */}
         <Paper elevation={3} sx={{ mt: 2, mb: 2, p: 2 }}>
           {(!firstCol || !secondCol || !fromDate || !toDate) ? (
             <Alert severity="info">Please select the weather types and dates to display the chart.</Alert>

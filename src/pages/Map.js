@@ -3,6 +3,7 @@ import AusMap from '../components/AusMap';
 import * as d3 from 'd3';
 import { Typography, FormControl, Select, MenuItem, Stack, TextField, InputLabel } from '@mui/material';
 
+// Define the mapping of weather types to their respective configurations
 const mapNameToConfig = {
   'Rain_mm': {
     displayName: 'Rainfall (mm)',
@@ -28,6 +29,7 @@ const Map = () => {
   const [date, setDate] = useState('2023-08-01');
   const [data, setData] = useState([]);
 
+  // Fetch weather data for each state
   useEffect(() => {
     setData([
       { 'State': 'NSW', [weatherType]: 0 },
@@ -61,6 +63,7 @@ const Map = () => {
         Map of Australia
       </Typography>
 
+      {/* Date and Weather Type selection */}
       <Stack direction='row' spacing={2} sx={{ mb: 2 }}>
         <TextField
           label="Select Date"
@@ -88,6 +91,7 @@ const Map = () => {
         </FormControl>
       </Stack>
 
+      {/* Display the map */}
       <AusMap
       data={data}
       dataName={weatherType}
