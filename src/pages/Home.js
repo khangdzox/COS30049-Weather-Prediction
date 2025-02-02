@@ -69,7 +69,7 @@ function Home() {
     const threedaysago = new Date(today);
     threedaysago.setDate(threedaysago.getDate() - 3);
 
-    fetch(`http://localhost:8000/api/data/weather?state=${location}&fromDate=${threedaysago.toISOString().split('T')[0]}&toDate=${today}`)
+    fetch(`/api/data/weather?state=${location}&fromDate=${threedaysago.toISOString().split('T')[0]}&toDate=${today}`)
     .then(response => response.json())
     .then(data => {
       setForecastCardData(data);
@@ -91,7 +91,7 @@ function Home() {
       todayData.State = location;
       delete todayData.Date;
 
-      fetch('http://localhost:8000/api/predict/rain_mm', {
+      fetch('/api/predict/rain_mm', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -120,7 +120,7 @@ function Home() {
       return;
     }
 
-    fetch(`http://localhost:8000/api/data/weather?state=${loadState}&fromDate=${loadDate}&toDate=${loadDate}`)
+    fetch(`/api/data/weather?state=${loadState}&fromDate=${loadDate}&toDate=${loadDate}`)
     .then(response => response.json())
     .then(data => {
       // Update the data to match the form fields
@@ -240,7 +240,7 @@ function Home() {
     } else {
       setMissingFields([]);
       if (forecastType === 'linear') {
-        fetch('http://localhost:8000/api/predict/rain_mm', {
+        fetch('/api/predict/rain_mm', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -254,7 +254,7 @@ function Home() {
         })
         .catch(error => console.error('Error submitting form data:', error));
       } else {
-        fetch('http://localhost:8000/api/predict/rain_indicator', {
+        fetch('/api/predict/rain_indicator', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -312,7 +312,7 @@ function Home() {
     setLoading(true);
 
     if (fromDate && toDate && weatherType && location) {
-      fetch(`http://localhost:8000/api/data/weather?state=${location}&weatherType=${weatherType}&fromDate=${fromDate}&toDate=${toDate}`)
+      fetch(`/api/data/weather?state=${location}&weatherType=${weatherType}&fromDate=${fromDate}&toDate=${toDate}`)
       .then(response => response.json())
       .then(data => {
         setGraphData(data);

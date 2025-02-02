@@ -43,7 +43,7 @@ const Map = () => {
     ]);
 
     for (const state of ausStates) {
-      fetch(`http://localhost:8000/api/data/weather?state=${state}&weatherType=${weatherType}&fromDate=${date}&toDate=${date}`)
+      fetch(`/api/data/weather?state=${state}&weatherType=${weatherType}&fromDate=${date}&toDate=${date}`)
       .then(res => res.json())
       .then(res => {
         setData(data => data.map(d => {

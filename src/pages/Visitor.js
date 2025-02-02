@@ -88,7 +88,7 @@ function Home() {
     // Else, submit the form data
     } else {
       setMissingFields([]);
-      fetch('http://localhost:8000/api/predict/visitor', {
+      fetch('/api/predict/visitor', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ function Home() {
 
     if (location && firstCol && fromDate && toDate) {
       setIsLoadingFirst(true);
-      fetch(`http://localhost:8000/api/data/visitors?state=${location}&columns=${firstCol}&fromDate=${fromDate}&toDate=${toDate}`)
+      fetch(`/api/data/visitors?state=${location}&columns=${firstCol}&fromDate=${fromDate}&toDate=${toDate}`)
       .then(response => response.json())
       .then(data => {
         setFirstData(data)
@@ -170,7 +170,7 @@ function Home() {
 
       if (secondCol === 'Date') {setIsLoadingSecond(false); return;}
 
-      fetch(`http://localhost:8000/api/data/visitors?state=${location}&columns=${secondCol}&fromDate=${fromDate}&toDate=${toDate}`)
+      fetch(`/api/data/visitors?state=${location}&columns=${secondCol}&fromDate=${fromDate}&toDate=${toDate}`)
       .then(response => response.json())
       .then(data => {
         setSecondData(data);
