@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
 from typing import Optional
@@ -224,3 +225,4 @@ def get_visitors_data(
 async def custom_404_handler(request, exc):
     return {"detail": "The resource you are looking for does not exist."}
 
+app.mount("/", StaticFiles(directory="build", html=True), name="build")
